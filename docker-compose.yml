@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: miketea_machine
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - miketea
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      NODE_ENV: production
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: miketea_machine
+      DB_USER: postgres
+      DB_PASSWORD: postgres123
+      PRODUCT_SYSTEM_API_URL: http://localhost:8080/api
+      FLAVOR_SYNC_ENABLED: "true"
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+    networks:
+      - miketea
+    command: npm start
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    networks:
+      - miketea
+    environment:
+      REACT_APP_API_URL: http://localhost:3000/api
+
+volumes:
+  postgres_data:
+
+networks:
+  miketea:
+    driver: bridge

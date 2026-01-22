@@ -1,0 +1,32 @@
+{
+  "name": "miketea-integration-backend",
+  "version": "1.0.0",
+  "description": "Milk Tea Machine Integration Module for POS System",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "db:migrate": "node migrations/runMigrations.js",
+    "db:seed": "node migrations/seed.js",
+    "test": "jest"
+  },
+  "keywords": ["milk-tea", "integration", "pos", "qr-code"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "pg": "^8.11.3",
+    "pg-promise": "^11.5.4",
+    "dotenv": "^16.3.1",
+    "cors": "^2.8.5",
+    "uuid": "^9.0.1",
+    "axios": "^1.6.2",
+    "node-cron": "^3.0.2",
+    "qrcode": "^1.5.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2",
+    "jest": "^29.7.0"
+  }
+}
