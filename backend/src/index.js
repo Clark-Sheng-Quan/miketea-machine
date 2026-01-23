@@ -2,13 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { initializeDatabase } from './config/database.js';
-import { setupScheduledTasks } from './services/scheduledTasks.js';
-import flavorRoutes from './routes/flavorRoutes.js';
-import templateRoutes from './routes/templateRoutes.js';
-import qrProtocolRoutes from './routes/qrProtocolRoutes.js';
-import posIntegrationRoutes from './routes/posIntegrationRoutes.js';
+import { OptionItemCode } from './models/OptionItemCode.js';
 import posServiceRoutes from './routes/posServiceRoutes.js';
-import adminRoutes from './routes/adminRoutes.js';
 
 dotenv.config();
 
@@ -25,15 +20,7 @@ app.get('/health', (req, res) => {
 });
 
 // Routes
-// Only enable POS service routes for now
 app.use('/api/service/pos', posServiceRoutes);
-
-// TODO: Enable these routes once actual POS API endpoints are integrated
-// app.use('/api/flavors', flavorRoutes);
-// app.use('/api/templates', templateRoutes);
-// app.use('/api/qr-protocol', qrProtocolRoutes);
-// app.use('/api/pos', posIntegrationRoutes);
-// app.use('/api/admin', adminRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -50,11 +37,9 @@ async function startServer() {
     await initializeDatabase();
     console.log('Database initialized successfully');
 
-    // TODO: Enable scheduled tasks once flavor sync API is integrated
-    // if (process.env.FLAVOR_SYNC_ENABLED === 'true') {
-    //   setupScheduledTasks();
-    //   console.log('Scheduled tasks configured');
-    // }
+    // Initialize database tables
+    await OptionItemCode.initializeTable();
+    console.log('Tables initialized successfully');
 
     // Start server
     app.listen(PORT, () => {

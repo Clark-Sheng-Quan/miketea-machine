@@ -1,6 +1,7 @@
 import express from 'express';
 import axios from 'axios';
 import dotenv from 'dotenv';
+import { OptionItemCode } from '../models/OptionItemCode.js';
 
 dotenv.config();
 
@@ -240,6 +241,120 @@ router.post('/products', async (req, res) => {
     res.status(error.response?.status || 500).json({
       success: false,
       message: 'Failed to fetch products',
+      error: error.message
+    });
+  }
+});
+
+/**
+ * POST /api/service/pos/item-codes/save
+ * Save option item codes to database
+ * Body: { business_id, item_codes: [{ optionId, optionItemId, code }, ...] }
+ */
+router.post('/item-codes/save', async (req, res) => {
+  try {
+    const { business_id, item_codes } = req.body;
+
+    if (!business_id) {
+      return res.status(400).json({
+        success: false,
+        message: 'business_id is required'
+      });
+    }
+
+    if (!Array.isArray(item_codes) || item_codes.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'item_codes array is required'
+      });
+    }
+
+    console.log(`[PosService] Saving ${item_codes.length} item codes for business ${business_id}`);
+
+    const result = await OptionItemCode.saveItemCodes(business_id, item_codes);
+
+    console.log(`[PosService] Successfully saved ${result.length} item codes for business ${business_id}`);
+
+    res.json({
+      success: true,
+      message: `Saved ${result.length} item codes`,
+      data: result
+    });
+  } catch (error) {
+    console.error('[PosService] Save item codes error:', error.message);
+    console.error('[PosService] Full error:', error);
+
+    res.status(500).json({
+      success: false,
+      message: 'Failed to save item codes',
+      error: error.message
+    });
+  }
+});
+
+/**
+ * GET /api/service/pos/item-codes/:business_id
+ * Get all item codes for a business
+ */
+router.get('/item-codes/:business_id', async (req, res) => {
+  try {
+    const { business_id } = req.params;
+
+    if (!business_id) {
+      return res.status(400).json({
+        success: false,
+        message: 'business_id is required'
+      });
+    }
+
+    console.log(`[PosService] Fetching item codes for business ${business_id}`);
+
+    const codes = await OptionItemCode.getItemCodesByBusinessId(business_id);
+
+    res.json({
+      success: true,
+      data: codes
+    });
+  } catch (error) {
+    console.error('[PosService] Get item codes error:', error.message);
+
+    res.status(500).json({
+      success: false,
+      message: 'Failed to get item codes',
+      error: error.message
+    });
+  }
+});
+
+/**
+ * GET /api/service/pos/item-codes/:business_id/option/:option_id
+ * Get item codes for a specific option
+ */
+router.get('/item-codes/:business_id/option/:option_id', async (req, res) => {
+  try {
+    const { business_id, option_id } = req.params;
+
+    if (!business_id || !option_id) {
+      return res.status(400).json({
+        success: false,
+        message: 'business_id and option_id are required'
+      });
+    }
+
+    console.log(`[PosService] Fetching item codes for option ${option_id} in business ${business_id}`);
+
+    const codes = await OptionItemCode.getItemCodesByOptionId(business_id, option_id);
+
+    res.json({
+      success: true,
+      data: codes
+    });
+  } catch (error) {
+    console.error('[PosService] Get item codes by option error:', error.message);
+
+    res.status(500).json({
+      success: false,
+      message: 'Failed to get item codes',
       error: error.message
     });
   }

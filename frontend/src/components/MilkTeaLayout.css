@@ -1,0 +1,198 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Hide Scroll */
+.hide-scroll {
+  scrollbar-width: none;
+}
+
+.hide-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* Left Sidebar */
+#Portal_RightTab_333 {
+  position: relative;
+  width: 260px;
+  flex-shrink: 0;
+  transition: width 0.1s ease;
+  background: rgb(245, 245, 249);
+  border-right: 1px solid rgba(0, 0, 0, 0.05);
+  overflow-y: auto;
+}
+
+#Portal_RightTab_333::-webkit-scrollbar {
+  width: 6px;
+}
+
+#Portal_RightTab_333::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#Portal_RightTab_333::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 3px;
+}
+
+#Portal_RightTab_333::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}
+
+/* Right Container */
+.Styling_ManagementTabContainer {
+  width: 100%;
+  padding-left: 1%;
+  overflow: hidden;
+  background: rgb(245, 245, 249);
+  flex: 1 1 0%;
+}
+
+/* Navigation Container */
+.Styling_NavigationContainer {
+  display: flex;
+  min-height: 50px;
+  padding-right: 30px;
+  overflow-y: auto;
+  background: white;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: rgba(0, 0, 0, 0.05) 0px 1px 3px;
+}
+
+/* Tab Item */
+.Styling_item_Container {
+  font-size: 15px;
+  background: white;
+  border: 0.1px solid rgba(0, 0, 0, 0.1);
+  padding: 12px 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #888;
+  font-weight: 500;
+  border-bottom: 3px solid transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.Styling_item_Container:hover {
+  background: rgba(0, 0, 0, 0.02);
+  color: #1c1c1e;
+}
+
+.Styling_item_Container.active {
+  border-bottom: 3px solid #007aff;
+  color: #1c1c1e;
+  font-weight: 600;
+}
+
+/* Management Container */
+#managementContainer_32 {
+  margin-bottom: 10vh;
+  gap: 20px;
+  padding: 20px;
+}
+
+.Styling_managentContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Tab Container */
+.Styling_ManagemntTab {
+  height: 100%;
+  z-index: 11;
+  background: rgb(245, 245, 249);
+  padding-top: 23px;
+  overflow: hidden;
+}
+
+/* Logout Button */
+.logout-btn {
+  width: 100%;
+  padding: 10px;
+  margin-top: 12px;
+  background: rgba(255, 59, 48, 0.2);
+  color: #ff3b30;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.logout-btn:hover {
+  background: rgba(255, 59, 48, 0.3);
+}
+
+/* Content Placeholder */
+.placeholder-content {
+  background: rgb(255, 255, 255);
+  border-radius: 16px;
+  padding: 40px;
+  box-shadow: rgba(0, 0, 0, 0.05) 0px 1px 3px;
+  text-align: center;
+}
+
+.placeholder-content h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1c1c1e;
+  margin: 0 0 10px 0;
+}
+
+.placeholder-content p {
+  color: #8e8e93;
+  font-size: 14px;
+  margin: 0;
+}
+
+/* Responsive */
+@media only screen and (min-width: 600px) {
+  #Portal_RightTab_333 {
+    position: relative;
+    width: 260px;
+    flex-shrink: 0;
+    transition: width 0.1s ease;
+  }
+
+  #managementContainer_32 {
+    padding: 20px;
+  }
+}
+
+@media only screen and (max-width: 600px) {
+  #Portal_RightTab_333 {
+    position: absolute;
+    display: none;
+    z-index: 555;
+    min-height: 100%;
+    max-width: none;
+    flex-direction: column;
+    width: 100vw;
+    transition: all 1s;
+    box-shadow: 11px 0px 6px 1px rgba(0, 0, 0, 0.2);
+  }
+
+  #managementContainer_32 {
+    padding: 10px;
+  }
+
+  .Styling_NavigationContainer {
+    padding: 0 10px;
+  }
+
+  .Styling_item_Container {
+    font-size: 13px;
+    padding: 10px 15px;
+  }
+}
