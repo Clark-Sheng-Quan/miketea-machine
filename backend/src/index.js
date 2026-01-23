@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { initializeDatabase } from './config/database.js';
 import { OptionItemCode } from './models/OptionItemCode.js';
+import { Template } from './models/Template.js';
 import posServiceRoutes from './routes/posServiceRoutes.js';
 
 dotenv.config();

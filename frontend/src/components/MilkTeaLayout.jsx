@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import './MilkTeaLayout.css'
 import OptionsManagement from '../pages/OptionsManagement'
+import QRProtocol from '../pages/QRProtocol'
 
 export default function MilkTeaLayout() {
   const [activeTab, setActiveTab] = useState('flavor-code')
@@ -90,12 +91,7 @@ export default function MilkTeaLayout() {
                       {/* Content - inside managementContainer_32 */}
                       <div style={{ flex: '1 1 0%', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
                         {activeTab === 'flavor-code' && <OptionsManagement />}
-                        {activeTab === 'qr-protocol' && (
-                          <div style={{ background: 'rgb(255, 255, 255)', borderRadius: '16px', padding: '40px', boxShadow: 'rgba(0, 0, 0, 0.05) 0px 1px 3px', textAlign: 'center' }}>
-                            <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#1c1c1e', margin: '0 0 10px 0' }}>QR Protocol</h3>
-                            <p style={{ color: '#8e8e93', fontSize: '14px', margin: 0 }}>Feature under development...</p>
-                          </div>
-                        )}
+                        {activeTab === 'qr-protocol' && <QRProtocol />}
                       </div>
                     </div>
                   </div>

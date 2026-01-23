@@ -9,6 +9,7 @@ export default function OptionsManagement() {
   const [loading, setLoading] = useState(false)
   const [expandedOptionId, setExpandedOptionId] = useState(null)
   const [itemCodes, setItemCodes] = useState({}) // { 'itemId': 'code' }
+  const [loadingCodes, setLoadingCodes] = useState(false)
 
   const loadOptions = async () => {
     try {
@@ -34,6 +35,41 @@ export default function OptionsManagement() {
   useEffect(() => {
     loadOptions()
   }, [])
+
+  // Load codes when option is expanded
+  const loadCodesForOption = async (optionId) => {
+    try {
+      setLoadingCodes(true)
+      const response = await itemCodesAPI.getByOption(POS_BUSINESS_ID, optionId)
+      
+      if (response.data.success && response.data.data) {
+        // Convert array to object: { itemId: code }
+        const codesMap = {}
+        response.data.data.forEach(item => {
+          codesMap[item.option_item_id] = item.code
+        })
+        setItemCodes(codesMap)
+        console.log('[OptionsManagement] Loaded codes:', codesMap)
+      }
+    } catch (error) {
+      console.error('[OptionsManagement] Failed to load codes:', error)
+      // Don't show error message, just continue with empty codes
+    } finally {
+      setLoadingCodes(false)
+    }
+  }
+
+  const handleOptionClick = (optionId) => {
+    if (expandedOptionId === optionId) {
+      // Collapse
+      setExpandedOptionId(null)
+      setItemCodes({})
+    } else {
+      // Expand and load codes
+      setExpandedOptionId(optionId)
+      loadCodesForOption(optionId)
+    }
+  }
 
   const handleSave = async () => {
     try {
@@ -90,7 +126,7 @@ export default function OptionsManagement() {
               options.map((option) => (
                 <div
                   key={option._id}
-                  onClick={() => setExpandedOptionId(expandedOptionId === option._id ? null : option._id)}
+                  onClick={() => handleOptionClick(option._id)}
                   style={{
                     padding: '12px 16px',
                     borderBottom: '1px solid #f0f0f0',
@@ -139,9 +175,10 @@ export default function OptionsManagement() {
             </div>
 
             <div style={{ flex: 1, overflowY: 'auto', padding: '16px' }}>
-              {currentOption.option_items && currentOption.option_items.length > 0 ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  {currentOption.option_items.map((item) => (
+              <Spin spinning={loadingCodes}>
+                {currentOption.option_items && currentOption.option_items.length > 0 ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    {currentOption.option_items.map((item) => (
                     <div
                       key={item._id}
                       style={{
@@ -192,6 +229,7 @@ export default function OptionsManagement() {
                   No items in this option
                 </div>
               )}
+              </Spin>
             </div>
           </>
         ) : (
