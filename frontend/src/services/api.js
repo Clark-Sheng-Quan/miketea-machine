@@ -43,7 +43,12 @@ export const productCodesAPI = {
     product_id: productId,
     code
   }),
-  delete: (businessId, productId) => client.delete(`/service/pos/product-codes/${productId}`, { params: { business_id: businessId } })
+  delete: (businessId, productId) => client.delete(`/service/pos/product-codes/${productId}`, { params: { business_id: businessId } }),
+  getSwitch: (businessId) => client.get('/service/pos/product-code-switch', { params: { business_id: businessId } }),
+  setSwitch: (businessId, enabled) => client.post('/service/pos/product-code-switch', { 
+    business_id: businessId, 
+    enabled
+  })
 };
 
 export default client;

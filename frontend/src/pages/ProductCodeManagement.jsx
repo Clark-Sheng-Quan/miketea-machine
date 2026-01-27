@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Input, Button, Spin, message } from 'antd'
+import { Input, Button, Spin, message, Switch } from 'antd'
 import { ReloadOutlined, SaveOutlined } from '@ant-design/icons'
 import { posAuthAPI, productCodesAPI } from '../services/api'
 import { POS_BUSINESS_ID } from '../config/constants'
@@ -16,6 +16,8 @@ export default function ProductCodeManagement() {
   const [currentPage, setCurrentPage] = useState(0)
   const [maxPage, setMaxPage] = useState(0)
   const [pageSize] = useState(20)
+  const [switchEnabled, setSwitchEnabled] = useState(false)
+  const [loadingSwitch, setLoadingSwitch] = useState(false)
 
   // Get token from localStorage on mount
   useEffect(() => {
@@ -30,9 +32,64 @@ export default function ProductCodeManagement() {
   // Load products and codes on mount
   useEffect(() => {
     if (token) {
-      loadProductsAndCodes()
+      loadSwitchAndProducts()
     }
   }, [token])
+
+  // Load switch status first, then load products if enabled
+  const loadSwitchAndProducts = async () => {
+    try {
+      const response = await productCodesAPI.getSwitch(POS_BUSINESS_ID)
+      if (response.data.success && response.data.data) {
+        const isEnabled = response.data.data.enabled || false
+        setSwitchEnabled(isEnabled)
+        
+        // Only load products if switch is enabled
+        if (isEnabled) {
+          await loadProductsAndCodes()
+        } else {
+          setLoading(false)
+        }
+      }
+    } catch (error) {
+      console.error('Error loading switch:', error)
+      setLoading(false)
+    }
+  }
+
+  // Load switch status (used for toggle)
+  const loadSwitch = async () => {
+    try {
+      const response = await productCodesAPI.getSwitch(POS_BUSINESS_ID)
+      if (response.data.success && response.data.data) {
+        setSwitchEnabled(response.data.data.enabled || false)
+      }
+    } catch (error) {
+      console.error('Error loading switch:', error)
+    }
+  }
+
+  // Handle switch toggle
+  const handleSwitchChange = async (checked) => {
+    try {
+      setLoadingSwitch(true)
+      const response = await productCodesAPI.setSwitch(POS_BUSINESS_ID, checked)
+      if (response.data.success) {
+        setSwitchEnabled(checked)
+        message.success(checked ? 'Product Code enabled' : 'Product Code disabled')
+        
+        // Load products if just enabled
+        if (checked) {
+          await loadProductsAndCodes()
+        }
+      }
+    } catch (error) {
+      console.error('Error updating switch:', error)
+      message.error('Failed to update setting')
+    } finally {
+      setLoadingSwitch(false)
+    }
+  }
 
   // Load products and existing codes from database
   const loadProductsAndCodes = async (pageIdx = 0) => {
@@ -142,10 +199,36 @@ export default function ProductCodeManagement() {
   }
 
   return (
-    <div style={{ display: 'flex', gap: '16px', minHeight: '100%', height: '100%' }}>
-      {/* Left: Products List */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', border: '1px solid #e0e0e0', borderRadius: '8px', background: 'white', minHeight: 0 }}>
-        <div style={{ padding: '16px', borderBottom: '1px solid #f0f0f0' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', minHeight: '100%', height: '100%' }}>
+      {/* Top: Switch Section */}
+      <div style={{ padding: '16px', border: '1px solid #e0e0e0', borderRadius: '8px', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <span style={{ fontSize: '14px', fontWeight: '600', color: '#333' }}>
+            Enable Product Code
+          </span>
+          <Switch
+            checked={switchEnabled}
+            onChange={handleSwitchChange}
+            loading={loadingSwitch}
+            disabled={loadingSwitch}
+          />
+        </div>
+        <span style={{ fontSize: '12px', color: '#999' }}>
+          {switchEnabled ? 'Active' : 'Inactive'}
+        </span>
+      </div>
+
+      {!switchEnabled && (
+        <div style={{ padding: '12px', background: '#fff7e6', border: '1px solid #ffe58f', borderRadius: '8px', color: '#ff7a45', fontSize: '13px' }}>
+          ⚠️ Product Code is currently disabled. Enable the switch above to manage product codes.
+        </div>
+      )}
+
+      {/* Main Content */}
+      <div style={{ display: 'flex', gap: '16px', minHeight: '100%', height: '100%', flex: 1, opacity: switchEnabled ? 1 : 0.5, pointerEvents: switchEnabled ? 'auto' : 'none' }}>
+        {/* Left: Products List */}
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', border: '1px solid #e0e0e0', borderRadius: '8px', background: 'white', minHeight: 0 }}>
+          <div style={{ padding: '16px', borderBottom: '1px solid #f0f0f0' }}>
           <div style={{ fontSize: '14px', fontWeight: '600', color: '#333' }}>
             Products
           </div>
@@ -322,6 +405,7 @@ export default function ProductCodeManagement() {
           </div>
         )}
       </div>
+    </div>
     </div>
   )
 }

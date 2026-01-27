@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import { OptionItemCode } from '../models/OptionItemCode.js';
 import { Template } from '../models/Template.js';
 import { ProductCode } from '../models/ProductCode.js';
+import { ProductCodeSwitch } from '../models/ProductCodeSwitch.js';
 
 dotenv.config();
 
@@ -704,6 +705,78 @@ router.delete('/product-codes/:product_id', async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to delete product code',
+      error: error.message
+    });
+  }
+});
+
+/**
+ * GET /api/service/pos/product-code-switch
+ * Get product code switch status for a business
+ * Query: { business_id }
+ * Returns: { success, data: { business_id, enabled } }
+ */
+router.get('/product-code-switch', async (req, res) => {
+  try {
+    const { business_id } = req.query;
+
+    if (!business_id) {
+      return res.status(400).json({
+        success: false,
+        message: 'business_id is required'
+      });
+    }
+
+    console.log(`[ProductCodeSwitch] Getting switch status for business: ${business_id}`);
+
+    const setting = await ProductCodeSwitch.getSwitch(business_id);
+
+    res.json({
+      success: true,
+      data: setting
+    });
+  } catch (error) {
+    console.error('[ProductCodeSwitch] Get error:', error.message);
+
+    res.status(500).json({
+      success: false,
+      message: 'Failed to get product code switch status',
+      error: error.message
+    });
+  }
+});
+
+/**
+ * POST /api/service/pos/product-code-switch
+ * Update product code switch status
+ * Body: { business_id, enabled }
+ * Returns: { success, data: { business_id, enabled } }
+ */
+router.post('/product-code-switch', async (req, res) => {
+  try {
+    const { business_id, enabled } = req.body;
+
+    if (!business_id || typeof enabled !== 'boolean') {
+      return res.status(400).json({
+        success: false,
+        message: 'business_id and enabled (boolean) are required'
+      });
+    }
+
+    console.log(`[ProductCodeSwitch] Setting switch for business: ${business_id}, enabled: ${enabled}`);
+
+    const result = await ProductCodeSwitch.updateSwitch(business_id, enabled);
+
+    res.json({
+      success: true,
+      data: result
+    });
+  } catch (error) {
+    console.error('[ProductCodeSwitch] Update error:', error.message);
+
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update product code switch',
       error: error.message
     });
   }
