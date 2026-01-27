@@ -3,6 +3,7 @@ import './MilkTeaLayout.css'
 import OptionsManagement from '../pages/OptionsManagement'
 import QRProtocol from '../pages/QRProtocol'
 import ProductCodeManagement from '../pages/ProductCodeManagement'
+import POS from '../pages/POS'
 
 export default function MilkTeaLayout() {
   const [activeTab, setActiveTab] = useState('option-code')
@@ -15,11 +16,11 @@ export default function MilkTeaLayout() {
 
   return (
     <div style={{ width: '100%', height: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <div style={{ flex: '1 1 0%' }}>
-        <div className="hide-scroll" style={{ overflowY: 'auto', maxHeight: '100%', position: 'relative', scrollbarWidth: 'none' }}>
-          <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', width: '100%', boxSizing: 'border-box' }}>
-            <div style={{ flex: '1 1 0%' }}>
-              <div style={{ width: '100%', height: '100%', display: 'flex' }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+        <div className="hide-scroll" style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative', scrollbarWidth: 'none', minHeight: 0 }}>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', width: '100%', boxSizing: 'border-box', minHeight: 0 }}>
+            <div style={{ flex: 1, display: 'flex', minHeight: 0 }}>
+              <div style={{ width: '100%', height: '100%', display: 'flex', minHeight: 0 }}>
                 {/* Left Sidebar */}
                 <div id="Portal_RightTab_333" className="Styling_ManagemntTab" style={{ height: '100%', zIndex: 11, background: 'rgb(245, 245, 249)', paddingTop: '23px' }}>
                   <div className="hide-scroll" style={{ overflowY: 'auto', maxHeight: '100%', position: 'relative', scrollbarWidth: 'none' }}>
@@ -53,33 +54,34 @@ export default function MilkTeaLayout() {
                 </div>
 
                 {/* Right Container */}
-                <div id="RightContainerBackend" className="Styling_RightManagement" style={{ overflow: 'hidden', background: 'rgb(245, 245, 249)', flex: '1 1 0%', width: 'auto' }}>
-                  <div className="hide-scroll" style={{ overflowY: 'auto', maxHeight: '100%', position: 'relative', scrollbarWidth: 'none' }}>
+                <div id="RightContainerBackend" className="Styling_RightManagement" style={{ flex: 1, background: 'rgb(245, 245, 249)', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+                  <div className="hide-scroll" style={{ flex: 1, position: 'relative', scrollbarWidth: 'none', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
                     {/* Management Container - with padding */}
-                    <div id="managementContainer_32" className="Styling_managentContainer" style={{ marginBottom: '10vh', gap: '20px', padding: '20px' }}>
+                    <div id="managementContainer_32" className="Styling_managentContainer" style={{ gap: '20px', padding: '20px', display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
                       {/* Navigation - inside managementContainer_32 with sticky */}
-                      <div style={{ width: '100%', position: 'sticky', top: 0, zIndex: 5 }}>
+                      <div style={{ width: '100%', position: 'sticky', top: 0, zIndex: 5, flexShrink: 0 }}>
                         <div className="Styling_NavigationContainer" style={{ minHeight: '50px', display: 'flex', alignItems: 'center', background: 'white', borderBottom: '1px solid rgba(0, 0, 0, 0.05)', boxShadow: 'rgba(0, 0, 0, 0.05) 0px 1px 3px' }}>
                           <div style={{ display: 'flex', minHeight: '60px', gap: 0, paddingRight: '30px' }}>
-                            {['Option Code', 'Product Code', 'QR Protocol'].map((tab, idx) => (
+                            {['Option Code', 'Product Code', 'QR Protocol', 'POS'].map((tab, idx) => (
                               <div
                                 key={idx}
                                 className={`Styling_item_Container ${
                                   idx === 0 ? (activeTab === 'option-code' ? 'active' : '') : 
                                   idx === 1 ? (activeTab === 'product-code' ? 'active' : '') :
-                                  (activeTab === 'qr-protocol' ? 'active' : '')
+                                  idx === 2 ? (activeTab === 'qr-protocol' ? 'active' : '') :
+                                  (activeTab === 'pos' ? 'active' : '')
                                 }`}
-                                onClick={() => setActiveTab(idx === 0 ? 'option-code' : idx === 1 ? 'product-code' : 'qr-protocol')}
+                                onClick={() => setActiveTab(idx === 0 ? 'option-code' : idx === 1 ? 'product-code' : idx === 2 ? 'qr-protocol' : 'pos')}
                                 style={{
                                   fontSize: '15px',
                                   background: 'white',
                                   border: '0.1px solid rgba(0, 0, 0, 0.1)',
                                   padding: '12px 20px',
                                   cursor: 'pointer',
-                                  borderBottom: activeTab === (idx === 0 ? 'option-code' : idx === 1 ? 'product-code' : 'qr-protocol') ? '3px solid #007aff' : 'none',
+                                  borderBottom: activeTab === (idx === 0 ? 'option-code' : idx === 1 ? 'product-code' : idx === 2 ? 'qr-protocol' : 'pos') ? '3px solid #007aff' : 'none',
                                   transition: 'all 0.2s',
-                                  color: activeTab === (idx === 0 ? 'option-code' : idx === 1 ? 'product-code' : 'qr-protocol') ? '#000' : '#888',
-                                  fontWeight: activeTab === (idx === 0 ? 'option-code' : idx === 1 ? 'product-code' : 'qr-protocol') ? '600' : '500',
+                                  color: activeTab === (idx === 0 ? 'option-code' : idx === 1 ? 'product-code' : idx === 2 ? 'qr-protocol' : 'pos') ? '#000' : '#888',
+                                  fontWeight: activeTab === (idx === 0 ? 'option-code' : idx === 1 ? 'product-code' : idx === 2 ? 'qr-protocol' : 'pos') ? '600' : '500',
                                   display: 'flex',
                                   alignItems: 'center',
                                   justifyContent: 'center',
@@ -94,10 +96,11 @@ export default function MilkTeaLayout() {
                       </div>
 
                       {/* Content - inside managementContainer_32 */}
-                      <div style={{ flex: '1 1 0%', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+                      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
                         {activeTab === 'option-code' && <OptionsManagement />}
                         {activeTab === 'product-code' && <ProductCodeManagement />}
                         {activeTab === 'qr-protocol' && <QRProtocol />}
+                        {activeTab === 'pos' && <POS />}
                       </div>
                     </div>
                   </div>

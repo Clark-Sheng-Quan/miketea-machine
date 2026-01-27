@@ -199,9 +199,9 @@ export default function ProductCodeManagement() {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', minHeight: '100%', height: '100%' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', flex: 1, minHeight: 0, height: '100%' }}>
       {/* Top: Switch Section */}
-      <div style={{ padding: '16px', border: '1px solid #e0e0e0', borderRadius: '8px', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div style={{ padding: '16px', border: '1px solid #e0e0e0', borderRadius: '8px', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <span style={{ fontSize: '14px', fontWeight: '600', color: '#333' }}>
             Enable Product Code
@@ -219,152 +219,152 @@ export default function ProductCodeManagement() {
       </div>
 
       {!switchEnabled && (
-        <div style={{ padding: '12px', background: '#fff7e6', border: '1px solid #ffe58f', borderRadius: '8px', color: '#ff7a45', fontSize: '13px' }}>
+        <div style={{ padding: '12px', background: '#fff7e6', border: '1px solid #ffe58f', borderRadius: '8px', color: '#ff7a45', fontSize: '13px', flexShrink: 0 }}>
           ⚠️ Product Code is currently disabled. Enable the switch above to manage product codes.
         </div>
       )}
 
       {/* Main Content */}
-      <div style={{ display: 'flex', gap: '16px', minHeight: '100%', height: '100%', flex: 1, opacity: switchEnabled ? 1 : 0.5, pointerEvents: switchEnabled ? 'auto' : 'none' }}>
+      <div style={{ display: 'flex', gap: '16px', flex: 1, opacity: switchEnabled ? 1 : 0.5, pointerEvents: switchEnabled ? 'auto' : 'none', minHeight: 0 }}>
         {/* Left: Products List */}
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', border: '1px solid #e0e0e0', borderRadius: '8px', background: 'white', minHeight: 0 }}>
           <div style={{ padding: '16px', borderBottom: '1px solid #f0f0f0' }}>
-          <div style={{ fontSize: '14px', fontWeight: '600', color: '#333' }}>
-            Products
-          </div>
-        </div>
-
-        <div style={{ flex: 1, overflowY: 'auto', padding: '12px' }}>
-          <Spin spinning={loadingProducts}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {products.map((product) => (
-                <div
-                  key={product.product_id}
-                  onClick={() => handleSelectProduct(product)}
-                  style={{
-                    padding: '12px',
-                    background: currentProduct?.product_id === product.product_id ? '#e6f7ff' : '#f9f9f9',
-                    border: currentProduct?.product_id === product.product_id ? '2px solid #1890ff' : '1px solid #e0e0e0',
-                    borderRadius: '6px',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (currentProduct?.product_id !== product.product_id) {
-                      e.currentTarget.style.background = '#f0f0f0'
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (currentProduct?.product_id !== product.product_id) {
-                      e.currentTarget.style.background = '#f9f9f9'
-                    }
-                  }}
-                >
-                  <div style={{ fontSize: '14px', fontWeight: '500', marginBottom: '4px', color: '#333' }}>
-                    {product.name}
-                  </div>
-                  {productCodes[product.product_id] && (
-                    <div style={{ fontSize: '12px', color: '#1890ff', fontWeight: '500' }}>
-                      Code: {productCodes[product.product_id]}
-                    </div>
-                  )}
-                </div>
-              ))}
+            <div style={{ fontSize: '14px', fontWeight: '600', color: '#333' }}>
+              Products
             </div>
-          </Spin>
-        </div>
+          </div>
 
-        {/* Pagination Controls */}
-        {maxPage > 0 && (
-          <div style={{ padding: '12px', borderTop: '1px solid #f0f0f0', background: '#fafafa' }}>
-            <div style={{ display: 'flex', gap: '4px', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap' }}>
-              <Button
-                disabled={currentPage === 0 || loadingProducts}
-                onClick={() => loadProductsAndCodes(0)}
-                size="small"
-                style={{ minWidth: '32px' }}
-              >
-                «
-              </Button>
-              <Button
-                disabled={currentPage === 0 || loadingProducts}
-                onClick={() => loadProductsAndCodes(currentPage - 1)}
-                size="small"
-                style={{ minWidth: '32px' }}
-              >
-                ‹
-              </Button>
-
-              {/* Page Numbers */}
-              {Array.from({ length: Math.min(5, maxPage) }).map((_, idx) => {
-                let pageNum = idx
-                if (currentPage > 2) {
-                  pageNum = currentPage - 2 + idx
-                } else if (currentPage > 0 && maxPage > 5) {
-                  pageNum = idx
-                }
-                
-                if (pageNum >= maxPage) return null
-                
-                return (
-                  <Button
-                    key={pageNum}
-                    type={currentPage === pageNum ? 'primary' : 'default'}
-                    disabled={loadingProducts}
-                    onClick={() => loadProductsAndCodes(pageNum)}
-                    size="small"
-                    style={{ minWidth: '32px' }}
+          <div style={{ height: '90vh', overflowY: 'auto', padding: '12px', minHeight: 0 }}>
+            <Spin spinning={loadingProducts}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {products.map((product) => (
+                  <div
+                    key={product.product_id}
+                    onClick={() => handleSelectProduct(product)}
+                    style={{
+                      padding: '12px',
+                      background: currentProduct?.product_id === product.product_id ? '#e6f7ff' : '#f9f9f9',
+                      border: currentProduct?.product_id === product.product_id ? '2px solid #1890ff' : '1px solid #e0e0e0',
+                      borderRadius: '6px',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (currentProduct?.product_id !== product.product_id) {
+                        e.currentTarget.style.background = '#f0f0f0'
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (currentProduct?.product_id !== product.product_id) {
+                        e.currentTarget.style.background = '#f9f9f9'
+                      }
+                    }}
                   >
-                    {pageNum + 1}
-                  </Button>
-                )
-              })}
-
-              <Button
-                disabled={currentPage >= maxPage - 1 || loadingProducts}
-                onClick={() => loadProductsAndCodes(currentPage + 1)}
-                size="small"
-                style={{ minWidth: '32px' }}
-              >
-                ›
-              </Button>
-              <Button
-                disabled={currentPage >= maxPage - 1 || loadingProducts}
-                onClick={() => loadProductsAndCodes(maxPage - 1)}
-                size="small"
-                style={{ minWidth: '32px' }}
-              >
-                »
-              </Button>
-
-              <span style={{ fontSize: '12px', color: '#666', marginLeft: '8px' }}>
-                {currentPage + 1} / {maxPage}
-              </span>
-            </div>
+                    <div style={{ fontSize: '14px', fontWeight: '500', marginBottom: '4px', color: '#333' }}>
+                      {product.name}
+                    </div>
+                    {productCodes[product.product_id] && (
+                      <div style={{ fontSize: '12px', color: '#1890ff', fontWeight: '500' }}>
+                        Code: {productCodes[product.product_id]}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </Spin>
           </div>
-        )}
-      </div>
 
-      {/* Right: Product Code Editor */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', border: '1px solid #e0e0e0', borderRadius: '8px', background: 'white', minHeight: 0 }}>
-        {currentProduct ? (
-          <>
-            <div style={{ padding: '16px', borderBottom: '1px solid #f0f0f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '600' }}>
-                {currentProduct.name}
-              </h3>
-              <Button
-                type="primary"
-                icon={<SaveOutlined />}
-                onClick={handleSaveCode}
-                loading={savingCode}
-                size="small"
-              >
-                Save
-              </Button>
+          {/* Pagination Controls */}
+          {maxPage > 0 && (
+            <div style={{ padding: '12px', borderTop: '1px solid #f0f0f0', background: '#fafafa', flexShrink: 0 }}>
+              <div style={{ display: 'flex', gap: '4px', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap' }}>
+                <Button
+                  disabled={currentPage === 0 || loadingProducts}
+                  onClick={() => loadProductsAndCodes(0)}
+                  size="small"
+                  style={{ minWidth: '32px' }}
+                >
+                  «
+                </Button>
+                <Button
+                  disabled={currentPage === 0 || loadingProducts}
+                  onClick={() => loadProductsAndCodes(currentPage - 1)}
+                  size="small"
+                  style={{ minWidth: '32px' }}
+                >
+                  ‹
+                </Button>
+
+                {/* Page Numbers */}
+                {Array.from({ length: Math.min(5, maxPage) }).map((_, idx) => {
+                  let pageNum = idx
+                  if (currentPage > 2) {
+                    pageNum = currentPage - 2 + idx
+                  } else if (currentPage > 0 && maxPage > 5) {
+                    pageNum = idx
+                  }
+                  
+                  if (pageNum >= maxPage) return null
+                  
+                  return (
+                    <Button
+                      key={pageNum}
+                      type={currentPage === pageNum ? 'primary' : 'default'}
+                      disabled={loadingProducts}
+                      onClick={() => loadProductsAndCodes(pageNum)}
+                      size="small"
+                      style={{ minWidth: '32px' }}
+                    >
+                      {pageNum + 1}
+                    </Button>
+                  )
+                })}
+
+                <Button
+                  disabled={currentPage >= maxPage - 1 || loadingProducts}
+                  onClick={() => loadProductsAndCodes(currentPage + 1)}
+                  size="small"
+                  style={{ minWidth: '32px' }}
+                >
+                  ›
+                </Button>
+                <Button
+                  disabled={currentPage >= maxPage - 1 || loadingProducts}
+                  onClick={() => loadProductsAndCodes(maxPage - 1)}
+                  size="small"
+                  style={{ minWidth: '32px' }}
+                >
+                  »
+                </Button>
+
+                <span style={{ fontSize: '12px', color: '#666', marginLeft: '8px' }}>
+                  {currentPage + 1} / {maxPage}
+                </span>
+              </div>
             </div>
+          )}
+        </div>
 
-            <div style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        {/* Right: Product Code Editor */}
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', border: '1px solid #e0e0e0', borderRadius: '8px', background: 'white', minHeight: 0 }}>
+          {currentProduct ? (
+            <>
+              <div style={{ padding: '16px', borderBottom: '1px solid #f0f0f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '600' }}>
+                  {currentProduct.name}
+                </h3>
+                <Button
+                  type="primary"
+                  icon={<SaveOutlined />}
+                  onClick={handleSaveCode}
+                  loading={savingCode}
+                  size="small"
+                >
+                  Save
+                </Button>
+              </div>
+
+              <div style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'flex', flexDirection: 'column', gap: '16px', minHeight: 0 }}>
               {/* Product ID */}
               <div>
                 <div style={{ fontSize: '12px', color: '#999', marginBottom: '6px' }}>
@@ -400,12 +400,12 @@ export default function ProductCodeManagement() {
             </div>
           </>
         ) : (
-          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'center', color: '#999', minHeight: 0, paddingTop: '60px' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'center', color: '#999', flex: 1, minHeight: 0, paddingTop: '60px' }}>
             Select a product from the left to edit product code
           </div>
         )}
+        </div>
       </div>
-    </div>
     </div>
   )
 }

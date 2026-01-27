@@ -110,15 +110,15 @@ export default function OptionsManagement() {
   const currentOption = expandedOptionId ? options.find(opt => opt._id === expandedOptionId) : null
 
   return (
-    <div style={{ display: 'flex', gap: '20px', height: '100%' }}>
+    <div style={{ display: 'flex', gap: '20px', flex: 1, minHeight: 0 }}>
       {/* Left: Options List */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
         <div style={{ marginBottom: '16px', fontSize: '14px', fontWeight: '600', color: '#333' }}>
           Option Group
         </div>
 
         <Spin spinning={loading}>
-          <div style={{ flex: 1, overflowY: 'auto', border: '1px solid #e0e0e0', borderRadius: '8px', background: 'white' }}>
+          <div style={{ height: '75vh', overflowY: 'auto', border: '1px solid #e0e0e0', borderRadius: '8px', background: 'white' }}>
             {options.length === 0 ? (
               <div style={{ padding: '20px', textAlign: 'center', color: '#999' }}>
                 No options found
@@ -238,7 +238,7 @@ export default function OptionsManagement() {
               </Button>
             </div>
 
-            <div style={{ flex: 1, overflowY: 'auto', padding: '16px' }}>
+            <div style={{ flex: 1, overflowY: 'auto', padding: '16px', minHeight: 0 }}>
               <Spin spinning={loadingCodes}>
                 {currentOption.option_items && currentOption.option_items.length > 0 ? (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
