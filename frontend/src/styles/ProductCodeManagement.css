@@ -1,0 +1,161 @@
+.product-code-management {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.product-code-management.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}
+
+.page-header {
+  margin-bottom: 32px;
+}
+
+.page-header h2 {
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  color: #1890ff;
+}
+
+.page-header p {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+.search-bar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+  align-items: center;
+}
+
+.search-bar input {
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+}
+
+.search-bar button {
+  white-space: nowrap;
+}
+
+.results-section {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03), 0 1px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px 0 rgba(0, 0, 0, 0.02);
+  overflow: hidden;
+}
+
+.no-results {
+  padding: 60px 24px;
+  text-align: center;
+  color: #999;
+}
+
+.no-results p {
+  margin: 0;
+  font-size: 14px;
+}
+
+/* Table styles */
+.product-codes-table {
+  font-size: 14px;
+}
+
+.product-codes-table .ant-table {
+  background: white;
+}
+
+.product-id {
+  font-family: monospace;
+  background: #f5f5f5;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 12px;
+}
+
+.product-name {
+  color: #333;
+  font-weight: 500;
+}
+
+.edit-code-input {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.edit-code-input input {
+  flex: 1;
+  max-width: 200px;
+}
+
+.code-display {
+  display: flex;
+  align-items: center;
+}
+
+.code-value {
+  background: #f0f5ff;
+  color: #1890ff;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-family: monospace;
+  font-weight: 500;
+  font-size: 13px;
+}
+
+.no-code {
+  color: #999;
+  font-style: italic;
+  font-size: 12px;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.action-buttons button {
+  font-size: 12px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .product-code-management {
+    padding: 16px;
+  }
+
+  .search-bar {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .search-bar input {
+    width: 100% !important;
+  }
+
+  .search-bar button {
+    width: 100%;
+  }
+
+  .product-codes-table {
+    font-size: 12px;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .action-buttons button {
+    width: 100%;
+  }
+}

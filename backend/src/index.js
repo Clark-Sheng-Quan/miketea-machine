@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import { initializeDatabase } from './config/database.js';
 import { OptionItemCode } from './models/OptionItemCode.js';
 import { Template } from './models/Template.js';
+import { ProductCode } from './models/ProductCode.js';
 import posServiceRoutes from './routes/posServiceRoutes.js';
 
 dotenv.config();
@@ -40,6 +41,8 @@ async function startServer() {
 
     // Initialize database tables
     await OptionItemCode.initializeTable();
+    await Template.initializeTable();
+    await ProductCode.initializeTable();
     console.log('Tables initialized successfully');
 
     // Start server

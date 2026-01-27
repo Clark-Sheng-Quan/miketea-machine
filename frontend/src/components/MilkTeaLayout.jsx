@@ -2,9 +2,10 @@ import React, { useState } from 'react'
 import './MilkTeaLayout.css'
 import OptionsManagement from '../pages/OptionsManagement'
 import QRProtocol from '../pages/QRProtocol'
+import ProductCodeManagement from '../pages/ProductCodeManagement'
 
 export default function MilkTeaLayout() {
-  const [activeTab, setActiveTab] = useState('flavor-code')
+  const [activeTab, setActiveTab] = useState('option-code')
 
   const handleLogout = () => {
     localStorage.removeItem('posToken')
@@ -60,21 +61,25 @@ export default function MilkTeaLayout() {
                       <div style={{ width: '100%', position: 'sticky', top: 0, zIndex: 5 }}>
                         <div className="Styling_NavigationContainer" style={{ minHeight: '50px', display: 'flex', alignItems: 'center', background: 'white', borderBottom: '1px solid rgba(0, 0, 0, 0.05)', boxShadow: 'rgba(0, 0, 0, 0.05) 0px 1px 3px' }}>
                           <div style={{ display: 'flex', minHeight: '60px', gap: 0, paddingRight: '30px' }}>
-                            {['Flavor Code', 'QR Protocol'].map((tab, idx) => (
+                            {['Option Code', 'Product Code', 'QR Protocol'].map((tab, idx) => (
                               <div
                                 key={idx}
-                                className={`Styling_item_Container ${idx === 0 ? (activeTab === 'flavor-code' ? 'active' : '') : (activeTab === 'qr-protocol' ? 'active' : '')}`}
-                                onClick={() => setActiveTab(idx === 0 ? 'flavor-code' : 'qr-protocol')}
+                                className={`Styling_item_Container ${
+                                  idx === 0 ? (activeTab === 'option-code' ? 'active' : '') : 
+                                  idx === 1 ? (activeTab === 'product-code' ? 'active' : '') :
+                                  (activeTab === 'qr-protocol' ? 'active' : '')
+                                }`}
+                                onClick={() => setActiveTab(idx === 0 ? 'option-code' : idx === 1 ? 'product-code' : 'qr-protocol')}
                                 style={{
                                   fontSize: '15px',
                                   background: 'white',
                                   border: '0.1px solid rgba(0, 0, 0, 0.1)',
                                   padding: '12px 20px',
                                   cursor: 'pointer',
-                                  borderBottom: activeTab === (idx === 0 ? 'flavor-code' : 'qr-protocol') ? '3px solid #007aff' : 'none',
+                                  borderBottom: activeTab === (idx === 0 ? 'option-code' : idx === 1 ? 'product-code' : 'qr-protocol') ? '3px solid #007aff' : 'none',
                                   transition: 'all 0.2s',
-                                  color: activeTab === (idx === 0 ? 'flavor-code' : 'qr-protocol') ? '#000' : '#888',
-                                  fontWeight: activeTab === (idx === 0 ? 'flavor-code' : 'qr-protocol') ? '600' : '500',
+                                  color: activeTab === (idx === 0 ? 'option-code' : idx === 1 ? 'product-code' : 'qr-protocol') ? '#000' : '#888',
+                                  fontWeight: activeTab === (idx === 0 ? 'option-code' : idx === 1 ? 'product-code' : 'qr-protocol') ? '600' : '500',
                                   display: 'flex',
                                   alignItems: 'center',
                                   justifyContent: 'center',
@@ -90,7 +95,8 @@ export default function MilkTeaLayout() {
 
                       {/* Content - inside managementContainer_32 */}
                       <div style={{ flex: '1 1 0%', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
-                        {activeTab === 'flavor-code' && <OptionsManagement />}
+                        {activeTab === 'option-code' && <OptionsManagement />}
+                        {activeTab === 'product-code' && <ProductCodeManagement />}
                         {activeTab === 'qr-protocol' && <QRProtocol />}
                       </div>
                     </div>

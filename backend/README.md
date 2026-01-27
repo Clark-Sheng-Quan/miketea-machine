@@ -2,7 +2,36 @@
 
 Node.js + Express backend for milk tea machine integration with POS system.
 
-## Setup
+## Prerequisites
+
+### Docker & PostgreSQL
+The backend requires PostgreSQL database running in Docker. Before starting the backend, ensure Docker is installed and the PostgreSQL container is running.
+
+## Getting Started
+
+### 1. Start PostgreSQL Docker Container
+
+First, start the PostgreSQL container:
+```bash
+docker start miketea-postgres
+```
+
+If the container doesn't exist, create it:
+```bash
+docker run --name miketea-postgres \
+  -e POSTGRES_USER=postgres \
+  -e POSTGRES_PASSWORD=postgres \
+  -e POSTGRES_DB=miketea_machine \
+  -p 5432:5432 \
+  -d postgres:15
+```
+
+Verify the container is running:
+```bash
+docker ps | grep miketea-postgres
+```
+
+### 2. Backend Setup
 
 1. Install dependencies:
 ```bash
@@ -21,7 +50,9 @@ npm run db:migrate
 npm run db:seed
 ```
 
-4. Start server:
+### 3. Start Backend Server
+
+Production mode:
 ```bash
 npm start
 ```
@@ -30,6 +61,16 @@ Development mode with auto-reload:
 ```bash
 npm run dev
 ```
+
+### Troubleshooting
+
+**Error: `ECONNREFUSED` on port 5432**
+- PostgreSQL container is not running
+- Solution: Run `docker start miketea-postgres`
+
+**Error: Database connection refused after restarting computer**
+- Docker containers don't auto-start after system restart
+- Solution: Always run `docker start miketea-postgres` before starting the backend
 
 ## API Endpoints
 
