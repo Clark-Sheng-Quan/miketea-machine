@@ -10,8 +10,11 @@ export default function OptionsManagement() {
   const [expandedOptionId, setExpandedOptionId] = useState(null)
   const [itemCodes, setItemCodes] = useState({}) // { 'itemId': 'code' }
   const [loadingCodes, setLoadingCodes] = useState(false)
+  const [currentPage, setCurrentPage] = useState(0)
+  const [maxPage, setMaxPage] = useState(0)
+  const [pageSize] = useState(50)
 
-  const loadOptions = async () => {
+  const loadOptions = async (pageIdx = 0) => {
     try {
       setLoading(true)
       const token = localStorage.getItem('posToken')
@@ -20,13 +23,18 @@ export default function OptionsManagement() {
         return
       }
 
-      const response = await posAuthAPI.getOptions(token, POS_BUSINESS_ID)
-      const optionsData = response.data.data?.option || response.data.data || [];
+      const response = await posAuthAPI.getOptions(token, POS_BUSINESS_ID, pageSize, pageIdx)
+      console.log('[OptionsManagement] Response:', response.data)
+      const optionsData = response.data.data?.option || []
+      const maxPageNum = response.data.data?.max_page || 0
       
-      setOptions(optionsData);
+      console.log('[OptionsManagement] Options data:', optionsData, 'maxPage:', maxPageNum)
+      setOptions(optionsData)
+      setCurrentPage(pageIdx)
+      setMaxPage(maxPageNum)
     } catch (error) {
       message.error(error.response?.data?.message || 'Failed to load options')
-      console.error(error)
+      console.error('[OptionsManagement] Error:', error)
     } finally {
       setLoading(false)
     }
@@ -105,15 +113,8 @@ export default function OptionsManagement() {
     <div style={{ display: 'flex', gap: '20px', height: '100%' }}>
       {/* Left: Options List */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-        <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Button 
-            type="primary" 
-            icon={<ReloadOutlined />} 
-            onClick={loadOptions}
-            loading={loading}
-          >
-            Refresh
-          </Button>
+        <div style={{ marginBottom: '16px', fontSize: '14px', fontWeight: '600', color: '#333' }}>
+          Option Group
         </div>
 
         <Spin spinning={loading}>
@@ -144,7 +145,7 @@ export default function OptionsManagement() {
                     {option.name}
                   </span>
                   <span style={{ fontSize: '12px', color: '#999' }}>
-                    {option.option_items?.length || 0} items
+                    {option.option_items?.length || 0}
                   </span>
                   <span style={{ fontSize: '16px', color: '#666' }}>
                     {expandedOptionId === option._id ? '▼' : '▶'}
@@ -154,6 +155,69 @@ export default function OptionsManagement() {
             )}
           </div>
         </Spin>
+
+        {/* Pagination Controls */}
+        {maxPage > 1 && (
+          <div style={{ marginTop: '12px', display: 'flex', gap: '8px', justifyContent: 'center', alignItems: 'center', padding: '0 16px' }}>
+            <Button
+              size="small"
+              onClick={() => loadOptions(0)}
+              disabled={currentPage === 0}
+            >
+              «
+            </Button>
+            <Button
+              size="small"
+              onClick={() => loadOptions(Math.max(0, currentPage - 1))}
+              disabled={currentPage === 0}
+            >
+              ‹
+            </Button>
+
+            {Array.from({ length: Math.min(5, maxPage) }).map((_, idx) => {
+              let pageNum = idx
+              if (currentPage > 2) {
+                pageNum = currentPage - 2 + idx
+              } else if (currentPage > 0 && maxPage > 5) {
+                pageNum = idx + (currentPage > 0 ? currentPage - 1 : 0)
+              }
+              if (pageNum >= maxPage) return null
+              return (
+                <Button
+                  key={pageNum}
+                  size="small"
+                  onClick={() => loadOptions(pageNum)}
+                  style={{
+                    background: currentPage === pageNum ? '#1890ff' : 'white',
+                    color: currentPage === pageNum ? 'white' : 'black',
+                    border: currentPage === pageNum ? '1px solid #1890ff' : '1px solid #d9d9d9'
+                  }}
+                >
+                  {pageNum + 1}
+                </Button>
+              )
+            })}
+
+            <Button
+              size="small"
+              onClick={() => loadOptions(Math.min(maxPage - 1, currentPage + 1))}
+              disabled={currentPage === maxPage - 1}
+            >
+              ›
+            </Button>
+            <Button
+              size="small"
+              onClick={() => loadOptions(maxPage - 1)}
+              disabled={currentPage === maxPage - 1}
+            >
+              »
+            </Button>
+
+            <span style={{ fontSize: '12px', color: '#999', marginLeft: '8px' }}>
+              {currentPage + 1} / {maxPage}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Right: Items Detail Editor */}
@@ -162,7 +226,7 @@ export default function OptionsManagement() {
           <>
             <div style={{ padding: '16px', borderBottom: '1px solid #f0f0f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '600' }}>
-                {currentOption.name} Items
+                {currentOption.name}
               </h3>
               <Button
                 type="primary"

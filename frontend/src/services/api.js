@@ -12,8 +12,8 @@ const client = axios.create({
 // Auth service for POS login and options
 export const posAuthAPI = {
   login: (email, password) => client.post('/service/pos/login', { email, password }),
-  getOptions: (token, businessId) => client.get('/service/pos/options', { params: { token, business_id: businessId } }),
-  searchProducts: (token, businessId, query = '', pageSize = 10, pageIdx = 0) => client.post('/service/pos/search-products', { query, page_size: pageSize, page_idx: pageIdx }, { params: { token, business_id: businessId } })
+  getOptions: (token, businessId, pageSize, pageIdx) => client.get('/service/pos/options', { params: { token, business_id: businessId, page_size: pageSize, page_idx: pageIdx } }),
+  searchProducts: (token, businessId, pageSize, pageIdx) => client.get('/service/pos/search-products', { params: { token, business_id: businessId, page_size: pageSize, page_idx: pageIdx } })
 };
 
 // Item codes service for database operations

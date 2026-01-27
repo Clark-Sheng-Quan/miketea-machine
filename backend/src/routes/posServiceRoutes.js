@@ -65,12 +65,14 @@ router.post('/login', async (req, res) => {
 
 /**
  * GET /api/service/pos/options
- * Get all options (flavors) from POS system
- * Query: { token, business_id }
+ * Get all options (flavors) from POS system with pagination
+ * Query: { token, business_id, page_size, page_idx }
  */
 router.get('/options', async (req, res) => {
   try {
-    const { token, business_id } = req.query;
+    const { token, business_id, page_size = '50', page_idx = '0' } = req.query;
+    const pageSize = parseInt(page_size);
+    const pageIdx = parseInt(page_idx);
 
     if (!token) {
       return res.status(401).json({
@@ -86,7 +88,7 @@ router.get('/options', async (req, res) => {
       });
     }
 
-    console.log('[PosService] Fetching options for business:', business_id);
+    console.log('[PosService] Fetching options for business:', business_id, 'page_idx:', pageIdx, 'page_size:', pageSize);
 
     const client = axios.create({
       baseURL: POS_API_BASE,
@@ -107,9 +109,31 @@ router.get('/options', async (req, res) => {
 
     console.log('[PosService] Options fetched successfully');
 
+    // Filter response to only include option_id, name, and option_items with item_id and name
+    const allOptions = (response.data?.option || []).map(option => ({
+      _id: option._id,
+      name: option.name,
+      option_items: (option.option_items || []).map(item => ({
+        _id: item._id,
+        name: item.name
+      }))
+    }));
+
+    // Apply pagination
+    const startIdx = pageIdx * pageSize;
+    const endIdx = startIdx + pageSize;
+    const paginatedOptions = allOptions.slice(startIdx, endIdx);
+    const maxPage = Math.ceil(allOptions.length / pageSize);
+
+    const filteredData = {
+      option: paginatedOptions,
+      max_page: maxPage,
+      total: allOptions.length
+    };
+
     res.json({
       success: true,
-      data: response.data
+      data: filteredData
     });
   } catch (error) {
     console.error('[PosService] Fetch options error:', error.message);
@@ -123,15 +147,15 @@ router.get('/options', async (req, res) => {
 });
 
 /**
- * POST /api/service/pos/search-products
+ * GET /api/service/pos/search-products
  * Search products from POS system
- * Query: { token, business_id }
- * Body: { query, page_size, page_idx }
+ * Query: { token, business_id, page_size, page_idx }
  */
-router.post('/search-products', async (req, res) => {
+router.get('/search-products', async (req, res) => {
   try {
-    const { token, business_id } = req.query;
-    const { query = '', page_size = 10, page_idx = 0 } = req.body;
+    const { token, business_id, page_size = '20', page_idx = '0' } = req.query;
+    const pageSize = parseInt(page_size);
+    const pageIdx = parseInt(page_idx);
 
     if (!token) {
       return res.status(401).json({
@@ -147,7 +171,7 @@ router.post('/search-products', async (req, res) => {
       });
     }
 
-    console.log('[PosService] Searching products for business:', business_id, 'query:', query, 'page_idx:', page_idx, 'page_size:', page_size);
+    console.log('[PosService] Searching products for business:', business_id, 'page_idx:', pageIdx, 'page_size:', pageSize);
 
     const client = axios.create({
       baseURL: POS_API_BASE,
@@ -163,16 +187,28 @@ router.post('/search-products', async (req, res) => {
       query: {
         business_id: business_id
       },
-      page_size: page_size,
-      page_idx: page_idx,
+      page_size: pageSize,
+      page_idx: pageIdx,
       detail: true
     });
 
     console.log('[PosService] Products searched successfully');
 
+    // Filter response to only include product_id and name
+    const filteredData = {
+      ...response.data,
+      data: {
+        ...response.data.data,
+        products: (response.data.data?.products || []).map(product => ({
+          product_id: product.product_id,
+          name: product.name
+        }))
+      }
+    };
+
     res.json({
       success: true,
-      data: response.data
+      data: filteredData
     });
   } catch (error) {
     console.error('[PosService] Search products error:', error.message);

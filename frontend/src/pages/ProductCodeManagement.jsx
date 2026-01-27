@@ -51,7 +51,7 @@ export default function ProductCodeManagement() {
       setProductCodes(codesMap)
 
       // Search products from POS API with pagination
-      const response = await posAuthAPI.searchProducts(token, POS_BUSINESS_ID, '', pageSize, pageIdx)
+      const response = await posAuthAPI.searchProducts(token, POS_BUSINESS_ID, pageSize, pageIdx)
 
       if (response.data.success && response.data.data) {
         const productList = response.data.data?.products || []
@@ -144,7 +144,7 @@ export default function ProductCodeManagement() {
   return (
     <div style={{ display: 'flex', gap: '16px', minHeight: '100%', height: '100%' }}>
       {/* Left: Products List */}
-      <div style={{ flex: 0.4, display: 'flex', flexDirection: 'column', border: '1px solid #e0e0e0', borderRadius: '8px', background: 'white', minHeight: 0 }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', border: '1px solid #e0e0e0', borderRadius: '8px', background: 'white', minHeight: 0 }}>
         <div style={{ padding: '16px', borderBottom: '1px solid #f0f0f0' }}>
           <div style={{ fontSize: '14px', fontWeight: '600', color: '#333' }}>
             Products
@@ -197,7 +197,7 @@ export default function ProductCodeManagement() {
             <div style={{ display: 'flex', gap: '4px', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap' }}>
               <Button
                 disabled={currentPage === 0 || loadingProducts}
-                onClick={() => handleSearchProducts(0)}
+                onClick={() => loadProductsAndCodes(0)}
                 size="small"
                 style={{ minWidth: '32px' }}
               >
@@ -205,7 +205,7 @@ export default function ProductCodeManagement() {
               </Button>
               <Button
                 disabled={currentPage === 0 || loadingProducts}
-                onClick={() => handleSearchProducts(currentPage - 1)}
+                onClick={() => loadProductsAndCodes(currentPage - 1)}
                 size="small"
                 style={{ minWidth: '32px' }}
               >
@@ -228,7 +228,7 @@ export default function ProductCodeManagement() {
                     key={pageNum}
                     type={currentPage === pageNum ? 'primary' : 'default'}
                     disabled={loadingProducts}
-                    onClick={() => handleSearchProducts(pageNum)}
+                    onClick={() => loadProductsAndCodes(pageNum)}
                     size="small"
                     style={{ minWidth: '32px' }}
                   >
@@ -239,7 +239,7 @@ export default function ProductCodeManagement() {
 
               <Button
                 disabled={currentPage >= maxPage - 1 || loadingProducts}
-                onClick={() => handleSearchProducts(currentPage + 1)}
+                onClick={() => loadProductsAndCodes(currentPage + 1)}
                 size="small"
                 style={{ minWidth: '32px' }}
               >
@@ -247,7 +247,7 @@ export default function ProductCodeManagement() {
               </Button>
               <Button
                 disabled={currentPage >= maxPage - 1 || loadingProducts}
-                onClick={() => handleSearchProducts(maxPage - 1)}
+                onClick={() => loadProductsAndCodes(maxPage - 1)}
                 size="small"
                 style={{ minWidth: '32px' }}
               >
@@ -263,7 +263,7 @@ export default function ProductCodeManagement() {
       </div>
 
       {/* Right: Product Code Editor */}
-      <div style={{ flex: 0.6, display: 'flex', flexDirection: 'column', border: '1px solid #e0e0e0', borderRadius: '8px', background: 'white', minHeight: 0 }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', border: '1px solid #e0e0e0', borderRadius: '8px', background: 'white', minHeight: 0 }}>
         {currentProduct ? (
           <>
             <div style={{ padding: '16px', borderBottom: '1px solid #f0f0f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -317,7 +317,7 @@ export default function ProductCodeManagement() {
             </div>
           </>
         ) : (
-          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#999' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'center', color: '#999', minHeight: 0, paddingTop: '60px' }}>
             Select a product from the left to edit product code
           </div>
         )}
