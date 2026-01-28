@@ -60,7 +60,7 @@ export class OptionItemCode {
   }
 
   // Get all item codes for a business
-  static async getItemCodesByBusinessId(businessId) {
+  static async getAllOptionCodes(businessId) {
     try {
       const codes = await db.manyOrNone(
         `SELECT * FROM option_item_codes 

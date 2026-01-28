@@ -6,7 +6,9 @@ import {
   generateQRStringsFromOrder,
   countValidOptionItems,
   getValidOptionGroups,
-  generateQRCodeDataURL
+  generateQRCodeDataURL,
+  syncQRDataFromAPI,
+  getLastSyncTime
 } from '../services/qrService.ts'
 
 export default function POS() {
@@ -18,6 +20,30 @@ export default function POS() {
   const [qrCodesModalVisible, setQrCodesModalVisible] = useState(false)
   const [qrCodes, setQrCodes] = useState([])
   const [generatingQRCodes, setGeneratingQRCodes] = useState(false)
+  const [lastSyncTime, setLastSyncTime] = useState(getLastSyncTime())
+  const [syncing, setSyncing] = useState(false)
+
+  // Handle syncing data from API
+  const handleSyncData = async () => {
+    try {
+      setSyncing(true)
+      const success = await syncQRDataFromAPI()
+      if (success) {
+        setLastSyncTime(getLastSyncTime())
+        // Reload formula after sync
+        const loadedFormula = await loadQRFormula()
+        setFormula(loadedFormula)
+        message.success('Data synced successfully from API')
+      } else {
+        message.error('Failed to sync data from API')
+      }
+    } catch (error) {
+      console.error('Sync error:', error)
+      message.error('Error during data sync')
+    } finally {
+      setSyncing(false)
+    }
+  }
 
   // Handle generating QR codes
   const handleGenerateQRCodes = async () => {
@@ -134,13 +160,31 @@ export default function POS() {
   return (
     <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '20px', flex: 1, minHeight: 0 }}>
       <Card title="POS Order QR Generator">
-        <Button 
-          type="primary"
-          icon={<UploadOutlined />}
-          onClick={loadPOSOrders}
-        >
-          Load POS Orders
-        </Button>
+        <Space direction="vertical" style={{ width: '100%' }}>
+          <Button 
+            type="primary"
+            icon={<UploadOutlined />}
+            onClick={loadPOSOrders}
+          >
+            Load POS Orders
+          </Button>
+          <div style={{ fontSize: '12px', color: '#666' }}>
+            <Button
+              type="link"
+              size="small"
+              onClick={handleSyncData}
+              loading={syncing}
+              disabled={syncing}
+            >
+              Sync Data from API
+            </Button>
+            {lastSyncTime && (
+              <span style={{ marginLeft: '8px' }}>
+                (Last synced: {new Date(lastSyncTime).toLocaleString()})
+              </span>
+            )}
+          </div>
+        </Space>
       </Card>
 
       {orderData && (

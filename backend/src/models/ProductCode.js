@@ -42,7 +42,7 @@ export class ProductCode {
   }
 
   // Get all product codes for a business
-  static async getProductCodesByBusinessId(businessId) {
+  static async getAllProductCodes(businessId) {
     try {
       const codes = await db.manyOrNone(
         `SELECT * FROM product_codes 

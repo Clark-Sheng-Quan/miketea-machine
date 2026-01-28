@@ -7,6 +7,15 @@ import QRCode from 'qrcode'
 
 const BUSINESS_ID = '67295c445242136caa4511d4'
 
+// Local storage keys
+const STORAGE_KEYS = {
+  FORMULA: 'qr_formula',
+  SWITCH: 'product_code_switch',
+  PRODUCT_CODES: 'product_codes',
+  OPTION_CODES: 'option_codes',
+  LAST_SYNC: 'qr_data_last_sync'
+}
+
 // Type definitions
 interface OptionItem {
   _id: string
@@ -75,27 +84,122 @@ interface SwitchResponse {
 }
 
 /**
- * Load QR formula from database
- * @returns {Promise<string>} QR formula string
+ * Get data from local storage
  */
-export const loadQRFormula = async (): Promise<string> => {
+const getFromStorage = (key: string): any => {
   try {
-    const response = await fetch(
-      `/api/service/pos/qr-protocol/formula?business_id=${BUSINESS_ID}`
-    )
-    const result: FormulaResponse = await response.json()
+    const data = localStorage.getItem(key)
+    return data ? JSON.parse(data) : null
+  } catch (error) {
+    console.error(`Failed to get data from storage key ${key}:`, error)
+    return null
+  }
+}
 
-    if (result.success && result.data?.formula) {
-      return result.data.formula
+/**
+ * Save data to local storage
+ */
+const saveToStorage = (key: string, data: any): void => {
+  try {
+    localStorage.setItem(key, JSON.stringify(data))
+  } catch (error) {
+    console.error(`Failed to save data to storage key ${key}:`, error)
+  }
+}
+
+/**
+ * Sync all data from API to local storage (single unified API call)
+ * @returns {Promise<boolean>} True if sync successful
+ */
+export const syncQRDataFromAPI = async (): Promise<boolean> => {
+  try {
+    console.log('[QR Service] Starting data sync from API...')
+    
+    // Single unified sync API call
+    const response = await fetch(
+      `/api/service/pos/sync-qr-data?business_id=${BUSINESS_ID}`
+    )
+    const result = await response.json()
+    
+    if (!result.success) {
+      console.error('[QR Service] Sync API returned error:', result.message)
+      return false
     }
 
-    // Return default formula if not found
-    return '#{productCode}|#{optionCodes}'
+    const data = result.data
+
+    // Save all data to local storage
+    if (data.formula) {
+      saveToStorage(STORAGE_KEYS.FORMULA, data.formula)
+      console.log('[QR Service] Formula synced')
+    }
+
+    if (data.switch !== undefined) {
+      saveToStorage(STORAGE_KEYS.SWITCH, data.switch)
+      console.log('[QR Service] Product code switch synced')
+    }
+
+    if (data.productCodes && Array.isArray(data.productCodes)) {
+      saveToStorage(STORAGE_KEYS.PRODUCT_CODES, data.productCodes)
+      console.log(`[QR Service] ${data.productCodes.length} product codes synced`)
+    }
+
+    if (data.optionCodes && Array.isArray(data.optionCodes)) {
+      // Group option codes by optionId for efficient lookup
+      const optionCodesMap: { [key: string]: any[] } = {}
+      for (const code of data.optionCodes) {
+        if (!optionCodesMap[code.option_id]) {
+          optionCodesMap[code.option_id] = []
+        }
+        optionCodesMap[code.option_id].push(code)
+      }
+      
+      // Save each option group separately for better performance
+      for (const [optionId, codes] of Object.entries(optionCodesMap)) {
+        const cacheKey = `${STORAGE_KEYS.OPTION_CODES}_${optionId}`
+        saveToStorage(cacheKey, codes)
+      }
+      console.log(`[QR Service] ${data.optionCodes.length} option codes synced`)
+    }
+
+    // Update last sync time
+    saveToStorage(STORAGE_KEYS.LAST_SYNC, new Date().toISOString())
+    console.log('[QR Service] Data sync completed successfully')
+    
+    return true
   } catch (error) {
-    console.error('Failed to load QR formula:', error)
-    // Return default formula on error
-    return '#{productCode}|#{optionCodes}'
+    console.error('Failed to sync QR data from API:', error)
+    return false
   }
+}
+
+/**
+ * Get last sync time
+ */
+export const getLastSyncTime = (): string | null => {
+  return getFromStorage(STORAGE_KEYS.LAST_SYNC)
+}
+
+/**
+ * Clear all cached data
+ */
+export const clearQRDataCache = (): void => {
+  Object.values(STORAGE_KEYS).forEach(key => {
+    localStorage.removeItem(key)
+  })
+  console.log('[QR Service] Cache cleared')
+}
+export const loadQRFormula = async (): Promise<string> => {
+  // Load from local storage only
+  const cached = getFromStorage(STORAGE_KEYS.FORMULA)
+  if (cached) {
+    console.log('[QR Service] Loading formula from cache')
+    return cached
+  }
+
+  // Return default formula if not in cache
+  console.log('[QR Service] No formula in cache, using default')
+  return '#{productCode}|#{optionCodes}'
 }
 
 /**
@@ -103,65 +207,61 @@ export const loadQRFormula = async (): Promise<string> => {
  * @returns {Promise<boolean>} True if enabled, false otherwise
  */
 const isProductCodeEnabled = async (): Promise<boolean> => {
-  try {
-    const response = await fetch(
-      `/api/service/pos/product-code-switch?business_id=${BUSINESS_ID}`
-    )
-    const result: SwitchResponse = await response.json()
-    if (result.success && result.data) {
-      return result.data.enabled === true
-    }
-  } catch (error) {
-    console.error('Failed to check product code switch:', error)
+  // Load from local storage only
+  const cached = getFromStorage(STORAGE_KEYS.SWITCH)
+  if (cached !== null) {
+    console.log('[QR Service] Loading product code switch from cache')
+    return cached === true
   }
-  return false // Default to disabled
+
+  // Default to disabled if not in cache
+  console.log('[QR Service] No product code switch in cache, defaulting to disabled')
+  return false
 }
 
 /**
- * Get product code from database
+ * Get product code from local storage
  * @param {string} productId - Product ID
  * @returns {Promise<string>} Product code or product ID as fallback
  */
 const getProductCode = async (productId: string): Promise<string> => {
-  try {
-    const response = await fetch(
-      `/api/service/pos/product-codes?business_id=${BUSINESS_ID}`
-    )
-    const result: ProductCodeResponse = await response.json()
-    if (result.success && result.data && Array.isArray(result.data)) {
-      const productCode = result.data.find(item => item.product_id === productId)
-      if (productCode) {
-        return productCode.code
-      }
+  // Load from local storage only
+  const cached = getFromStorage(STORAGE_KEYS.PRODUCT_CODES)
+  if (cached && Array.isArray(cached)) {
+    console.log('[QR Service] Loading product codes from cache')
+    const productCode = cached.find(item => item.product_id === productId)
+    if (productCode) {
+      return productCode.code
     }
-  } catch (error) {
-    console.error('Failed to get product code:', error)
   }
-  return productId // Fallback to product ID
+
+  // Fallback to product ID if not in cache
+  console.log(`[QR Service] Product code for ${productId} not in cache, using product ID`)
+  return productId
 }
 
 /**
- * Get option item code from database
+ * Get option item code from local storage
  * @param {string} optionId - Option ID
  * @param {string} optionItemId - Option item ID
  * @returns {Promise<string>} Option code or option item ID as fallback
  */
 const getOptionItemCode = async (optionId: string, optionItemId: string): Promise<string> => {
-  try {
-    const response = await fetch(
-      `/api/service/pos/item-codes/${BUSINESS_ID}/option/${optionId}`
-    )
-    const result: OptionCodeResponse = await response.json()
-    if (result.success && result.data && Array.isArray(result.data)) {
-      const itemCode = result.data.find(item => item.option_item_id === optionItemId)
-      if (itemCode) {
-        return itemCode.code
-      }
+  // Load from local storage only
+  const cacheKey = `${STORAGE_KEYS.OPTION_CODES}_${optionId}`
+  let cached = getFromStorage(cacheKey)
+  
+  if (cached && Array.isArray(cached)) {
+    console.log(`[QR Service] Loading option codes for ${optionId} from cache`)
+    const itemCode = cached.find(item => item.option_item_id === optionItemId)
+    if (itemCode) {
+      return itemCode.code
     }
-  } catch (error) {
-    console.error('Failed to get option item code:', error)
   }
-  return optionItemId // Fallback to option item ID
+
+  // Fallback to option item ID if not in cache
+  console.log(`[QR Service] Option code for ${optionItemId} not in cache, using option item ID`)
+  return optionItemId
 }
 
 /**

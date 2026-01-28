@@ -747,6 +747,79 @@ router.get('/product-code-switch', async (req, res) => {
 });
 
 /**
+ * GET /api/service/pos/sync-qr-data
+ * Sync all QR-related data from database to frontend
+ * Returns all data needed for QR code generation in one response
+ * Query: { business_id }
+ * Returns: { success, data: { formula, switch, productCodes, optionCodes } }
+ */
+router.get('/sync-qr-data', async (req, res) => {
+  try {
+    const { business_id } = req.query;
+
+    if (!business_id) {
+      return res.status(400).json({
+        success: false,
+        message: 'business_id is required'
+      });
+    }
+
+    console.log(`[SyncQRData] Syncing all QR data for business: ${business_id}`);
+
+    // Fetch all data in parallel
+    const [formula, switchStatus, productCodes, optionCodes] = await Promise.all([
+      // Get QR formula
+      Template.getActive(business_id).catch(err => {
+        console.error('[SyncQRData] Error fetching formula:', err.message);
+        return null;
+      }),
+      // Get product code switch status
+      ProductCodeSwitch.getSwitch(business_id).catch(err => {
+        console.error('[SyncQRData] Error fetching switch:', err.message);
+        return { enabled: false };
+      }),
+      // Get all product codes for this business
+      ProductCode.getAllProductCodes(business_id).catch(err => {
+        console.error('[SyncQRData] Error fetching product codes:', err.message);
+        return [];
+      }),
+      // Get all option item codes
+      OptionItemCode.getAllOptionCodes(business_id).catch(err => {
+        console.error('[SyncQRData] Error fetching option codes:', err.message);
+        return [];
+      })
+    ]);
+
+    // Parse template_json if it's a string
+    let formulaStr = '#{productCode}|#{optionCodes}';
+    if (formula && formula.template_json) {
+      const parsed = typeof formula.template_json === 'string' 
+        ? JSON.parse(formula.template_json) 
+        : formula.template_json;
+      formulaStr = parsed.formula || formulaStr;
+    }
+
+    res.json({
+      success: true,
+      data: {
+        formula: formulaStr,
+        switch: switchStatus?.enabled || false,
+        productCodes: productCodes || [],
+        optionCodes: optionCodes || []
+      }
+    });
+  } catch (error) {
+    console.error('[SyncQRData] Sync error:', error.message);
+
+    res.status(500).json({
+      success: false,
+      message: 'Failed to sync QR data',
+      error: error.message
+    });
+  }
+});
+
+/**
  * POST /api/service/pos/product-code-switch
  * Update product code switch status
  * Body: { business_id, enabled }
