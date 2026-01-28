@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Select, Input, Button, message, Spin } from 'antd'
+import { Select, Input, Button, Spin } from 'antd'
 import { qrProtocolAPI } from '../services/api.js'
 import { POS_BUSINESS_ID } from '../config/constants.js'
 
@@ -46,11 +46,10 @@ export default function QRProtocol() {
           setEditingFormula(formula)
           setSavedFormula(formula)
           setParameters(extractParameters(formula))
-          message.success('Formula loaded from database')
         }
       } catch (error) {
         console.error('Failed to load formula:', error)
-        message.error('Failed to load formula from database')
+        
       } finally {
         setLoading(false)
       }
@@ -124,7 +123,6 @@ export default function QRProtocol() {
     if (template) {
       setEditingFormula(template.formula)
       setParameters(extractParameters(template.formula))
-      message.success(`Loaded template: ${template.name}`)
     }
   }
 
@@ -148,7 +146,6 @@ export default function QRProtocol() {
 
   const handleSaveAndUse = async () => {
     if (!editingFormula.trim()) {
-      message.error('Please enter a formula')
       return
     }
     
@@ -167,15 +164,10 @@ export default function QRProtocol() {
         setSavedFormula(correctedFormula)
         setParameters(extractParameters(correctedFormula))
         
-        if (correctedFormula !== editingFormula) {
-          message.success('Formula auto-corrected and saved to database!')
-        } else {
-          message.success('Formula saved to database!')
-        }
       }
     } catch (error) {
       console.error('Failed to save formula:', error)
-      message.error('Failed to save formula to database')
+
     } finally {
       setSaving(false)
     }
@@ -190,7 +182,6 @@ export default function QRProtocol() {
 
   const handleGenerate = () => {
     if (!editingFormula.trim()) {
-      message.error('Please enter a formula')
       return
     }
 
@@ -208,7 +199,6 @@ export default function QRProtocol() {
     }
 
     if (missingParams.length > 0) {
-      message.error(`Please fill in: ${missingParams.join(', ')}`)
       return
     }
 
@@ -217,14 +207,11 @@ export default function QRProtocol() {
     Object.entries(parameters).forEach(([key, value]) => {
       result = result.replace(new RegExp(`#{${key}}`, 'g'), value)
     })
-
-    message.success('Generated successfully!')
   }
 
   const handleCopy = () => {
     if (generatedValue) {
       navigator.clipboard.writeText(generatedValue)
-      message.success('Copied to clipboard!')
     }
   }
 

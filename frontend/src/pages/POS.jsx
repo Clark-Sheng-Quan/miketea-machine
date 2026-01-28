@@ -1,12 +1,13 @@
 import React, { useState } from 'react'
-import { Button, Select, Card, message, Collapse, Tag, Spin, Button as CopyButton, Space } from 'antd'
-import { UploadOutlined, CopyOutlined } from '@ant-design/icons'
+import { Button, Select, Card, message, Collapse, Tag, Spin, Button as CopyButton, Space, Modal } from 'antd'
+import { UploadOutlined, CopyOutlined, QrcodeOutlined } from '@ant-design/icons'
 import {
   loadQRFormula,
   generateQRStringsFromOrder,
   countValidOptionItems,
-  getValidOptionGroups
-} from '../services/qrService'
+  getValidOptionGroups,
+  generateQRCodeDataURL
+} from '../services/qrService.ts'
 
 export default function POS() {
   const [orderData, setOrderData] = useState(null)
@@ -14,6 +15,41 @@ export default function POS() {
   const [formula, setFormula] = useState('#{productCode}|#{optionCodes}')
   const [qrStrings, setQrStrings] = useState([])
   const [loading, setLoading] = useState(false)
+  const [qrCodesModalVisible, setQrCodesModalVisible] = useState(false)
+  const [qrCodes, setQrCodes] = useState([])
+  const [generatingQRCodes, setGeneratingQRCodes] = useState(false)
+
+  // Handle generating QR codes
+  const handleGenerateQRCodes = async () => {
+    if (qrStrings.length === 0) {
+      message.error('No QR strings to generate')
+      return
+    }
+
+    try {
+      setGeneratingQRCodes(true)
+      const qrStringValues = qrStrings.map(item => item.qrString)
+      const dataURLs = await Promise.all(
+        qrStringValues.map(qrString => generateQRCodeDataURL(qrString))
+      )
+      
+      const qrCodesData = qrStrings.map((item, idx) => ({
+        key: item.key,
+        productName: item.productName,
+        qrString: item.qrString,
+        dataURL: dataURLs[idx]
+      }))
+      
+      setQrCodes(qrCodesData)
+      setQrCodesModalVisible(true)
+      message.success('QR codes generated successfully')
+    } catch (error) {
+      console.error('Failed to generate QR codes:', error)
+      message.error('Failed to generate QR codes')
+    } finally {
+      setGeneratingQRCodes(false)
+    }
+  }
 
   // Handle order selection - auto-generate QR strings
   const handleOrderSelect = async (value) => {
@@ -197,6 +233,17 @@ export default function POS() {
         <Spin spinning={loading}>
           <Card 
             title="QR String"
+            extra={
+              <Button
+                type="primary"
+                icon={<QrcodeOutlined />}
+                onClick={handleGenerateQRCodes}
+                loading={generatingQRCodes}
+                disabled={generatingQRCodes}
+              >
+                Generate QR Code
+              </Button>
+            }
             style={{ flex: 1, minHeight: 0 }}
             bodyStyle={{ overflow: 'auto', height: '100%' }}
           >
@@ -228,6 +275,62 @@ export default function POS() {
               </div>
             </div>
           </Card>
+
+          {/* QR Codes Modal */}
+          <Modal
+            title="Generated QR Codes"
+            open={qrCodesModalVisible}
+            onCancel={() => setQrCodesModalVisible(false)}
+            footer={[
+              <Button key="close" onClick={() => setQrCodesModalVisible(false)}>
+                Close
+              </Button>
+            ]}
+            width={900}
+            style={{ maxHeight: '80vh' }}
+            bodyStyle={{ maxHeight: '60vh', overflow: 'auto' }}
+          >
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              {qrCodes.map((qrCode, idx) => (
+                <div
+                  key={qrCode.key}
+                  style={{
+                    padding: '16px',
+                    border: '1px solid #e0e0e0',
+                    borderRadius: '8px',
+                    backgroundColor: '#fafafa',
+                    textAlign: 'center'
+                  }}
+                >
+                  <div style={{ marginBottom: '12px' }}>
+                    <strong>{qrCode.productName}</strong>
+                    <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
+                      <code>{qrCode.qrString}</code>
+                    </div>
+                  </div>
+                  <div style={{ marginBottom: '12px' }}>
+                    <img
+                      src={qrCode.dataURL}
+                      alt={`QR Code ${idx + 1}`}
+                      style={{ maxWidth: '300px', height: 'auto' }}
+                    />
+                  </div>
+                  <Button
+                    type="primary"
+                    size="small"
+                    onClick={() => {
+                      const link = document.createElement('a')
+                      link.href = qrCode.dataURL
+                      link.download = `QRCode_${qrCode.productName}_${idx + 1}.png`
+                      link.click()
+                    }}
+                  >
+                    Download QR Code
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </Modal>
         </Spin>
       )}
     </div>
