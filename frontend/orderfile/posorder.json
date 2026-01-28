@@ -39,7 +39,7 @@
                 "name": "small",
                 "option_id": "66e1456131136ac4b7860fb5",
                 "price_adjust": 1,
-                "qty": 0,
+                "qty": 1,
                 "type": "normal"
               },
               {
@@ -90,7 +90,7 @@
                 "name": "Premium Açaí",
                 "option_id": "66e24c1631136ac4b7860fcb",
                 "price_adjust": 2,
-                "qty": 0,
+                "qty": 1,
                 "type": "normal"
               },
               {
@@ -146,7 +146,7 @@
                 "name": "Passion Fruit",
                 "option_id": "66e24fe031136ac4b7860fd3",
                 "price_adjust": 1.5,
-                "qty": 0,
+                "qty": 1,
                 "type": "normal"
               },
               {

@@ -337,29 +337,22 @@ export default function QRProtocol() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           {/* Format Info */}
           <div>
-            <h4 style={{ margin: '0 0 8px 0', fontSize: '14px', fontWeight: '600', color: '#333' }}>Parameter Formats</h4>
+            <h4 style={{ margin: '0 0 8px 0', fontSize: '14px', fontWeight: '600', color: '#333' }}>Available Parameters</h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '12px' }}>
               <div style={{ padding: '8px', background: '#f5f5f5', borderRadius: '4px' }}>
-                <span style={{ fontWeight: '600' }}>#{'{productCode}'}</span> - System parameter (auto-corrects case)
+                <span style={{ fontWeight: '600' }}>#{'{productCode}'}</span> - Product code from database (when enabled), or raw product ID (when disabled)
               </div>
               <div style={{ padding: '8px', background: '#f5f5f5', borderRadius: '4px' }}>
-                <span style={{ fontWeight: '600' }}>#{'{optionCodes}'}</span> - Custom option group
+                <span style={{ fontWeight: '600' }}>#{'{optionCodes}'}</span> - All selected option codes combined and separated by commas (e.g., "S1,B2,T3")
               </div>
               <div style={{ padding: '8px', background: '#f5f5f5', borderRadius: '4px' }}>
-                <span style={{ fontWeight: '600' }}>#{'{orderID}'}</span> - Match order ID
+                <span style={{ fontWeight: '600' }}>#{'{orderId}'}</span> - Order ID
               </div>
-            </div>
-          </div>
-
-          {/* Separator Info */}
-          <div>
-            <h4 style={{ margin: '0 0 8px 0', fontSize: '14px', fontWeight: '600', color: '#333' }}>Common Use Cases</h4>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '12px' }}>
-              <div style={{ padding: '8px', background: '#f5f5f5', borderRadius: '4px', fontFamily: 'monospace' }}>
-                <strong>Pospal:</strong> =#{'{productCode}'}|#{'{optionCode1}'},#{'{optionCode2}'}
+              <div style={{ padding: '8px', background: '#f5f5f5', borderRadius: '4px' }}>
+                <span style={{ fontWeight: '600' }}>#{'{itemId}'}</span> - Item ID (Sequel number)
               </div>
-              <div style={{ padding: '8px', background: '#f5f5f5', borderRadius: '4px', fontFamily: 'monospace' }}>
-                <strong>Milk Tea Machine:</strong> #{'{productCode}'}|#{'{Size}'}|#{'{SugarLevel}'},#{'{IceLevel}'}|#{'{Toppings}'}
+              <div style={{ padding: '8px', background: '#f5f5f5', borderRadius: '4px' }}>
+                <span style={{ fontWeight: '600' }}>#{'{sku}'}</span> - SKU (Product SKU)
               </div>
             </div>
           </div>
@@ -368,18 +361,18 @@ export default function QRProtocol() {
           <div>
             <h4 style={{ margin: '0 0 8px 0', fontSize: '14px', fontWeight: '600', color: '#333' }}>Example: How to Use</h4>
             <div style={{ padding: '12px', background: '#f0f8ff', borderRadius: '6px', fontSize: '12px', color: '#333', lineHeight: '1.8' }}>
-              <strong>Example Formula:</strong><br/>
+              <strong>Example Formulas:</strong><br/>
               <span style={{ fontFamily: 'monospace', color: '#666' }}>
-                #{'{productCode}'}|#{'{Size}'}|#{'{SugarLevel}'},#{'{IceLevel}'}|#{'{Toppings}'}
+                #{'{orderId}'}|#{'{itemId}'}|#{'{sku}'}
               </span>
-              <br/><br/>
-              
-              <strong>Parameters to fill:</strong><br/>
-              - productCode: Product code from system<br/>
-              - Size: Size code (e.g. S01, S02)<br/>
-              - SugarLevel: Sugar level code (e.g. 甜度A, 甜度B)<br/>
-              - IceLevel: Ice level code (e.g. 冰度A, 冰度B)<br/>
-              - Toppings: Toppings code (e.g. 配料A)<br/>
+              <br/>
+              <span style={{ fontFamily: 'monospace', color: '#666' }}>
+                #{'{productCode}'}|#{'{optionCodes}'}
+              </span>
+              <br/>
+              <span style={{ fontFamily: 'monospace', color: '#666' }}>
+                #{'{sku}'}-#{'{itemId}'}
+              </span>
             </div>
           </div>
         </div>
