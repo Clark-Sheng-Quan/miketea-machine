@@ -327,10 +327,10 @@ export default function QRProtocol() {
             <h4 style={{ margin: '0 0 8px 0', fontSize: '14px', fontWeight: '600', color: '#333' }}>Available Parameters</h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '12px' }}>
               <div style={{ padding: '8px', background: '#f5f5f5', borderRadius: '4px' }}>
-                <span style={{ fontWeight: '600' }}>#{'{productCode}'}</span> - Product code from database (when enabled), or raw product ID (when disabled)
+                <span style={{ fontWeight: '600' }}>#{'{productCode}'}</span> - Switch ON: use configured code | Switch OFF: use raw product ID
               </div>
               <div style={{ padding: '8px', background: '#f5f5f5', borderRadius: '4px' }}>
-                <span style={{ fontWeight: '600' }}>#{'{optionCodes}'}</span> - All selected option codes combined and separated by commas (e.g., "S1,B2,T3")
+                <span style={{ fontWeight: '600' }}>#{'{optionCodes}'}</span> - Auto-fills all selected options, comma-separated (e.g., S1,B2,T3)
               </div>
               <div style={{ padding: '8px', background: '#f5f5f5', borderRadius: '4px' }}>
                 <span style={{ fontWeight: '600' }}>#{'{orderId}'}</span> - Order ID
@@ -339,7 +339,7 @@ export default function QRProtocol() {
                 <span style={{ fontWeight: '600' }}>#{'{itemId}'}</span> - Item ID (Sequel number)
               </div>
               <div style={{ padding: '8px', background: '#f5f5f5', borderRadius: '4px' }}>
-                <span style={{ fontWeight: '600' }}>#{'{sku}'}</span> - SKU (Product SKU)
+                <span style={{ fontWeight: '600' }}>#{'{sku}'}</span> - SKU (Stock Keeping Unit)
               </div>
             </div>
           </div>

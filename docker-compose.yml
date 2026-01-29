@@ -17,7 +17,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     environment:
-      NODE_ENV: production
+      NODE_ENV: development
       DB_HOST: postgres
       DB_PORT: 5432
       DB_NAME: miketea_machine
@@ -31,7 +31,10 @@ services:
       - postgres
     networks:
       - miketea
-    command: sh -c "npm run db:migrate && npm start"
+    volumes:
+      - ./backend/src:/app/src
+      - ./backend/migrations:/app/migrations
+    command: sh -c "npm run db:migrate && npm run dev"
 
   frontend:
     build:
@@ -43,6 +46,10 @@ services:
       - miketea
     environment:
       REACT_APP_API_URL: http://localhost:3000/api
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/index.html:/app/index.html
+      - ./frontend/vite.config.js:/app/vite.config.js
 
 volumes:
   postgres_data:

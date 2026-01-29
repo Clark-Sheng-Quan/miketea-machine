@@ -102,7 +102,7 @@ export default function POS() {
 
   const loadPOSOrders = async () => {
     try {
-      const response = await fetch('/orderfile/posorder.json')
+      const response = await fetch('../orderfile/posorder.json')
       const data = await response.json()
       const normalizedData = normalizePOSData(data)
       setOrderData(normalizedData)

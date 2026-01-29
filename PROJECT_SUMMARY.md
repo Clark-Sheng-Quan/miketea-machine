@@ -70,3 +70,32 @@ CORS 配置
  设置日志记录
  配置告警
  定期备份数据库
+
+
+
+Token - 复用 POS Token。现在需要在 sync-qr-data 端点验证 token 的有效性。我来为你实现 token 认证逻辑。
+
+Optimizing tool selection...
+
+Edited
+posServiceRoutes.js+57-2
+完成。现在 sync-qr-data 端点已经实现了 token 验证。具体流程是：
+
+工作流程：
+
+POS Android 设备登陆
+
+获得 POS API 返回的 token
+
+调用 sync-qr-data 时附带 token
+
+后端验证流程
+
+提取 Authorization header 中的 token
+向 POS API 的 /admin/user/profile 端点验证 token
+如果 token 有效，继续返回 QR 数据
+如果 token 过期或无效，返回 401 错误
+POS Android 设备的集成示例：
+
+现在 token 验证是安全的 - 每次 sync-qr-data 请求都会向 POS API 验证 token 是否仍然有效。
+

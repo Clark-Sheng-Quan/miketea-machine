@@ -6,7 +6,60 @@ A complete milk tea machine integration module for POS system synchronization. I
 
 ---
 
-## 📊 Project Overview
+## � Docker Commands Reference
+
+### Start Services
+```bash
+docker-compose up -d                    # Start all services
+docker-compose up -d frontend           # Start frontend
+docker-compose up -d backend            # Start backend
+docker-compose up -d --build            # Rebuild and start all
+docker-compose up -d --build backend    # Rebuild and start backend
+```
+
+### Monitor Services
+```bash
+docker-compose ps                       # Container status
+docker-compose logs -f                  # All logs
+docker-compose logs -f backend          # Backend logs
+docker-compose logs -f frontend         # Frontend logs
+docker-compose logs -f postgres         # Database logs
+```
+
+### Update Code
+
+#### Frontend Changes
+```bash
+docker-compose up -d --build frontend   # Rebuild after changes
+# Hot-reload automatic, save and refresh
+# Hard refresh: Ctrl+Shift+R or F12 → Clear Cache
+```
+
+#### Backend Changes
+```bash
+docker-compose restart backend          # Restart (code only)
+docker-compose up -d --build backend    # Rebuild (package.json changed)
+docker-compose logs -f backend          # View logs
+```
+
+#### Database Changes
+```bash
+docker-compose down
+docker-compose up -d --build            # Rebuild (keep data)
+docker-compose down -v
+docker-compose up -d --build            # Rebuild (delete data)
+```
+
+### Stop & Cleanup
+```bash
+docker-compose stop                     # Stop services (keep data)
+docker-compose down                     # Stop and remove containers
+docker-compose down -v                  # Delete all data
+```
+
+---
+
+## �📊 Project Overview
 
 | Component | Technology | Port |
 |-----------|-----------|------|
