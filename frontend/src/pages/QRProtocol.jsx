@@ -230,30 +230,6 @@ export default function QRProtocol() {
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', border: '1px solid #e0e0e0', borderRadius: '8px', background: 'white', padding: '20px', overflowY: 'auto' }}>
         <h3 style={{ margin: '0 0 16px 0', fontSize: '16px', fontWeight: '600' }}>QR Code Formula</h3>
 
-       
-        {/* <div style={{ marginBottom: '20px' }}>
-          <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', marginBottom: '8px', color: '#333' }}>
-            Select Template
-          </label>
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <Select
-              value={selectedTemplate}
-              onChange={handleTemplateChange}
-              style={{ flex: 1 }}
-              options={templates.map(t => ({
-                value: t.id,
-                label: t.name
-              }))}
-            />
-            <Button
-              onClick={handleLoadTemplate}
-              style={{ minWidth: '80px' }}
-            >
-              Load
-            </Button>
-          </div>
-        </div> */}
-
         {/* Formula Editor */}
         <div style={{ marginBottom: '20px' }}>
           <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', marginBottom: '8px', color: '#333' }}>
@@ -262,17 +238,14 @@ export default function QRProtocol() {
           <Input.TextArea
             value={editingFormula}
             onChange={(e) => handleFormulaEdit(e.target.value)}
-            placeholder="Enter formula, e.g., ORD|#{productCode}|#{optionCodes}"
-            rows={4}
+            placeholder="e.g., ORD|#{productCode}|#{optionCodes}"
+            rows={6}
             style={{
               fontSize: '13px',
               fontFamily: 'monospace',
               padding: '12px'
             }}
           />
-          <div style={{ fontSize: '12px', color: '#999', marginTop: '4px' }}>
-            Use #{'{paramName}'} for parameters. All parameters use camelCase identifiers.
-          </div>
         </div>
 
         {/* Save and Use Button */}
@@ -287,81 +260,96 @@ export default function QRProtocol() {
           {saving ? 'Saving...' : 'Save and Use Formula'}
         </Button>
 
-
-        {/* Parameters Display */}
+        {/* Available Parameters */}
         <div>
           <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', marginBottom: '12px', color: '#333' }}>
-            Template Parameters
+            Available Parameters
           </label>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            {Object.entries(parameters).length > 0 ? (
-              Object.keys(parameters).map((key) => (
-                <div key={key} style={{
-                  padding: '8px 12px',
-                  background: '#f5f5f5',
-                  borderRadius: '4px',
-                  fontSize: '12px',
-                  fontFamily: 'monospace',
-                  color: '#333',
-                  border: '1px solid #e0e0e0'
-                }}>
-                  #{'{' + key + '}'} - {key}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            {[
+              { key: 'productCode', desc: 'Switch ON: uses configured product code. Switch OFF: uses raw product ID' },
+              { key: 'optionCodes', desc: 'Auto-populates all selected options, comma-separated (e.g., S1,B2,T3)' },
+              { key: 'orderId', desc: 'Unique order identifier from POS system' },
+              { key: 'itemId', desc: 'Sequence number for each item in the order' },
+              { key: 'sku', desc: 'Product SKU code' }
+            ].map((param) => (
+              <div key={param.key} style={{
+                padding: '8px',
+                background: '#f5f5f5',
+                borderRadius: '4px',
+                fontSize: '11px',
+                borderLeft: '3px solid #1890ff',
+                lineHeight: '1.4'
+              }}>
+                <div style={{ fontWeight: '600', fontFamily: 'monospace', display: 'inline' }}>
+                  #{'{' + param.key + '}'}
                 </div>
-              ))
-            ) : (
-              <div style={{ fontSize: '12px', color: '#999' }}>
-                No parameters detected in template
+                <div style={{ color: '#666', display: 'inline', marginLeft: '6px' }}>
+                  {param.desc}
+                </div>
               </div>
-            )}
+            ))}
           </div>
         </div>
       </div>
 
       {/* Help & Info */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', border: '1px solid #e0e0e0', borderRadius: '8px', background: 'white', padding: '20px', overflowY: 'auto' }}>
-        <h3 style={{ margin: '0 0 16px 0', fontSize: '16px', fontWeight: '600' }}>Format Guide</h3>
+        <h3 style={{ margin: '0 0 16px 0', fontSize: '16px', fontWeight: '600' }}>How to Use</h3>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          {/* Format Info */}
+          {/* Example Formulas */}
           <div>
-            <h4 style={{ margin: '0 0 8px 0', fontSize: '14px', fontWeight: '600', color: '#333' }}>Available Parameters</h4>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '12px' }}>
-              <div style={{ padding: '8px', background: '#f5f5f5', borderRadius: '4px' }}>
-                <span style={{ fontWeight: '600' }}>#{'{productCode}'}</span> - Switch ON: use configured code | Switch OFF: use raw product ID
+            <h4 style={{ margin: '0 0 12px 0', fontSize: '13px', fontWeight: '600', color: '#333' }}>Example Formulas</h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '12px' }}>
+              <div style={{ padding: '10px', background: '#f0f8ff', borderRadius: '4px', borderLeft: '3px solid #52c41a' }}>
+                <div style={{ fontFamily: 'monospace', color: '#666', marginBottom: '4px' }}>
+                  ORD|#{'{orderId}'}|#{'{productCode}'}|#{'{optionCodes}'}
+                </div>
+                <div style={{ color: '#999', fontSize: '11px' }}>
+                  ORD|order123|P01|S1,B2,T3
+                </div>
               </div>
-              <div style={{ padding: '8px', background: '#f5f5f5', borderRadius: '4px' }}>
-                <span style={{ fontWeight: '600' }}>#{'{optionCodes}'}</span> - Auto-fills all selected options, comma-separated (e.g., S1,B2,T3)
+              <div style={{ padding: '10px', background: '#f0f8ff', borderRadius: '4px', borderLeft: '3px solid #52c41a' }}>
+                <div style={{ fontFamily: 'monospace', color: '#666', marginBottom: '4px' }}>
+                  =#{'{productCode}'}|#{'{optionCodes}'}
+                </div>
+                <div style={{ color: '#999', fontSize: '11px' }}>
+                  =P01|S1,B2,T3
+                </div>
               </div>
-              <div style={{ padding: '8px', background: '#f5f5f5', borderRadius: '4px' }}>
-                <span style={{ fontWeight: '600' }}>#{'{orderId}'}</span> - Order ID
-              </div>
-              <div style={{ padding: '8px', background: '#f5f5f5', borderRadius: '4px' }}>
-                <span style={{ fontWeight: '600' }}>#{'{itemId}'}</span> - Item ID (Sequel number)
-              </div>
-              <div style={{ padding: '8px', background: '#f5f5f5', borderRadius: '4px' }}>
-                <span style={{ fontWeight: '600' }}>#{'{sku}'}</span> - SKU (Stock Keeping Unit)
+              <div style={{ padding: '10px', background: '#f0f8ff', borderRadius: '4px', borderLeft: '3px solid #52c41a' }}>
+                <div style={{ fontFamily: 'monospace', color: '#666', marginBottom: '4px' }}>
+                  #{'{itemId}'}|#{'{orderId}'}|#{'{productCode}'}|#{'{optionCodes}'}|#{'{sku}'}
+                </div>
+                <div style={{ color: '#999', fontSize: '11px' }}>
+                  item01|order123|P01|S1,B2,T3|sku123
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Example */}
+          {/* Tips */}
           <div>
-            <h4 style={{ margin: '0 0 8px 0', fontSize: '14px', fontWeight: '600', color: '#333' }}>Example: How to Use</h4>
-            <div style={{ padding: '12px', background: '#f0f8ff', borderRadius: '6px', fontSize: '12px', color: '#333', lineHeight: '1.8' }}>
-              <strong>Example Formulas:</strong><br/>
-              <span style={{ fontFamily: 'monospace', color: '#666' }}>
-                #{'{orderId}'}|#{'{itemId}'}|#{'{sku}'}
-              </span>
-              <br/>
-              <span style={{ fontFamily: 'monospace', color: '#666' }}>
-                #{'{productCode}'}|#{'{optionCodes}'}
-              </span>
-              <br/>
-              <span style={{ fontFamily: 'monospace', color: '#666' }}>
-                #{'{sku}'}-#{'{itemId}'}
-              </span>
-            </div>
+            <h4 style={{ margin: '50px 0 12px 0', fontSize: '13px', fontWeight: '600', color: '#333' }}>Guidelines</h4>
+            <ul style={{ margin: '0', paddingLeft: '16px', fontSize: '12px', color: '#666', lineHeight: '1.8' }}>
+              <li>Use <code style={{ background: '#f5f5f5', padding: '2px 6px', borderRadius: '2px' }}>|</code> or <code style={{ background: '#f5f5f5', padding: '2px 6px', borderRadius: '2px' }}>,</code> or <code style={{ background: '#f5f5f5', padding: '2px 6px', borderRadius: '2px' }}>-</code> as delimiters</li>
+              
+              <li>All parameters in #{'{}'} will be replaced with actual values at runtime</li>
+              <li>Parameter names are not case-sensitive</li>
+              <li>Click "Save and Use Formula" to apply changes</li>
+            </ul>
           </div>
+
+          {/* Quick Tips */}
+          {/* <div style={{ padding: '12px', background: '#fffbe6', borderRadius: '4px', borderLeft: '3px solid #faad14' }}>
+            <div style={{ fontSize: '12px', fontWeight: '600', marginBottom: '8px', color: '#333' }}>💡 Quick Tips</div>
+            <ul style={{ margin: '0', paddingLeft: '16px', fontSize: '11px', color: '#666', lineHeight: '1.6' }}>
+              <li>Start simple: use just <code style={{ background: '#f5f5f5', padding: '1px 4px', borderRadius: '2px' }}>#{'{orderId}'}</code> first</li>
+              <li>Add delimiters to make QR codes more readable</li>
+              <li>Test with the parameters shown in the left panel</li>
+            </ul>
+          </div> */}
         </div>
       </div>
         </>

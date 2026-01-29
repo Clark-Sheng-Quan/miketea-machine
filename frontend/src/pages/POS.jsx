@@ -158,225 +158,213 @@ export default function POS() {
   ]
 
   return (
-    <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '20px', flex: 1, minHeight: 0 }}>
-      <Card title="POS Order QR Generator">
-        <Space direction="vertical" style={{ width: '100%' }}>
-          <Button 
-            type="primary"
-            icon={<UploadOutlined />}
-            onClick={loadPOSOrders}
-          >
-            Load POS Orders
-          </Button>
-          <div style={{ fontSize: '12px', color: '#666' }}>
+    <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '16px', flex: 1, minHeight: 0 }}>
+      {/* Top Control Panel */}
+      <div style={{ display: 'flex', gap: '16px' }}>
+        {/* Left: Load and Sync */}
+        <Card style={{ flex: 0.3 }} title="Operations">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <Button 
+              type="primary"
+              block
+              icon={<UploadOutlined />}
+              onClick={loadPOSOrders}
+            >
+              Load Orders
+            </Button>
             <Button
-              type="link"
+              block
               size="small"
               onClick={handleSyncData}
               loading={syncing}
               disabled={syncing}
             >
-              Sync Data from API
+              Sync API Data
             </Button>
             {lastSyncTime && (
-              <span style={{ marginLeft: '8px' }}>
-                (Last synced: {new Date(lastSyncTime).toLocaleString()})
-              </span>
+              <div style={{ fontSize: '11px', color: '#999', textAlign: 'center' }}>
+                Last: {new Date(lastSyncTime).toLocaleString()}
+              </div>
             )}
           </div>
-        </Space>
-      </Card>
+        </Card>
 
-      {orderData && (
-        <Card title="Configuration">
-          <div style={{ marginBottom: '16px' }}>
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600' }}>
-              Select Order:
-            </label>
-            <Select
-              placeholder="Select an order"
-              onChange={handleOrderSelect}
-              style={{ width: '100%', marginBottom: '16px' }}
-              options={orderData.orders.map((order, idx) => ({
-                value: idx,
-                label: `Order ${idx + 1} - ${order._id} (${order.products.length} items)`
-              }))}
-            />
-          </div>
-
-          {selectedOrder !== null && orderData?.orders[selectedOrder] && (
-            <Card 
-              title="Order Details" 
-              style={{ marginBottom: '16px', backgroundColor: '#fafafa' }}
-              size="small"
-            >
-              <div style={{ marginBottom: '12px' }}>
-                <strong>Order ID:</strong> <code>{orderData.orders[selectedOrder]._id}</code>
-              </div>
-              <div style={{ marginBottom: '12px' }}>
-                <strong>Products:</strong>
-              </div>
-              <Collapse 
-                items={orderData.orders[selectedOrder].products.map((product, idx) => ({
-                  key: idx,
-                  label: (
-                    <span>
-                      {product.name} 
-                      <Tag color="blue" style={{ marginLeft: '8px' }}>
-                        {countValidOptionItems(product)} items
-                      </Tag>
-                    </span>
-                  ),
-                  children: (
-                    <div>
-                      {getValidOptionGroups(product).map((optGroup, groupIdx) => (
-                        <div key={groupIdx} style={{ marginBottom: '12px' }}>
-                          <strong>{optGroup.name}:</strong>
-                          <div style={{ marginLeft: '16px', marginTop: '8px' }}>
-                            {optGroup.option_items?.filter(item => item.qty >= 1).map((item, itemIdx) => (
-                              <div key={itemIdx} style={{ padding: '4px 0' }}>
-                                <Tag color="green">{item.name}</Tag> 
-                                <code style={{ fontSize: '11px', color: '#666' }}>({item._id})</code>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )
+        {/* Right: Order Selection and Details */}
+        <Card style={{ flex: 0.7 }} title="Order Selection">
+          {orderData ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <Select
+                placeholder="Select an order"
+                onChange={handleOrderSelect}
+                options={orderData.orders.map((order, idx) => ({
+                  value: idx,
+                  label: `Order ${idx + 1} - ${order._id.slice(0, 8)}... (${order.products.length} items)`
                 }))}
               />
-            </Card>
+              
+              {selectedOrder !== null && orderData?.orders[selectedOrder] && (
+                <div style={{ padding: '12px', backgroundColor: '#f5f5f5', borderRadius: '4px', fontSize: '12px' }}>
+                  <div style={{ marginBottom: '8px' }}>
+                    <strong>Order:</strong> <code>{orderData.orders[selectedOrder]._id.slice(0, 16)}...</code>
+                  </div>
+                  <div>
+                    <strong>Products:</strong>
+                    {orderData.orders[selectedOrder].products.map((p, idx) => (
+                      <div key={idx} style={{ marginLeft: '12px', fontSize: '11px', marginTop: '4px' }}>
+                        • {p.name} ({countValidOptionItems(p)} options)
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div style={{ color: '#999', fontSize: '12px', textAlign: 'center', padding: '20px 0' }}>
+              Load orders to start
+            </div>
           )}
-
-          <div style={{ marginBottom: '16px' }}>
-            <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600' }}>
-              QR Formula:
-              {loading && <Tag color="processing" style={{ marginLeft: '8px' }}>Loading...</Tag>}
-            </label>
-            <input
-              type="text"
-              value={formula}
-              readOnly
-              style={{
-                width: '100%',
-                padding: '8px 12px',
-                border: '1px solid #d0d0d0',
-                borderRadius: '4px',
-                fontSize: '14px',
-                backgroundColor: '#f5f5f5',
-                cursor: 'not-allowed'
-              }}
-              placeholder="e.g., ORD|#{orderId}|#{productId}|#{optionItemId}"
-            />
-          </div>
         </Card>
-      )}
+      </div>
 
-      {qrStrings.length > 0 && (
-        <Spin spinning={loading}>
-          <Card 
-            title="QR String"
-            extra={
-              <Button
-                type="primary"
-                icon={<QrcodeOutlined />}
-                onClick={handleGenerateQRCodes}
-                loading={generatingQRCodes}
-                disabled={generatingQRCodes}
-              >
-                Generate QR Code
-              </Button>
-            }
-            style={{ flex: 1, minHeight: 0 }}
-            bodyStyle={{ overflow: 'auto', height: '100%' }}
-          >
-            <div 
-              style={{
-                padding: '16px',
-                border: '2px solid #d9d9d9',
-                borderRadius: '4px',
-                backgroundColor: '#fafafa',
-                textAlign: 'center'
-              }}
-            >
-              <div style={{ marginBottom: '16px' }}>
-                <strong style={{ fontSize: '16px' }}>{qrStrings[0]?.productName}</strong>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
-                <code style={{ fontSize: '18px', color: '#d4380d', wordBreak: 'break-all', flex: 1 }}>
-                  {qrStrings[0]?.qrString}
-                </code>
-                <Button
-                  type="primary"
-                  size="large"
-                  icon={<CopyOutlined />}
-                  onClick={() => {
-                    navigator.clipboard.writeText(qrStrings[0]?.qrString)
-                    message.success('Copied to clipboard')
-                  }}
-                />
-              </div>
+      {/* Formula and QR Generation */}
+      {orderData && (
+        <div style={{ display: 'flex', gap: '16px' }}>
+          {/* Left: Formula */}
+          <Card style={{ flex: 0.4 }} title="QR Formula">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <input
+                type="text"
+                value={formula}
+                readOnly
+                style={{
+                  width: '100%',
+                  padding: '8px',
+                  border: '1px solid #d0d0d0',
+                  borderRadius: '4px',
+                  fontSize: '12px',
+                  fontFamily: 'monospace',
+                  backgroundColor: '#f5f5f5',
+                  cursor: 'not-allowed'
+                }}
+              />
+              {loading && <Tag color="processing">Loading Formula...</Tag>}
             </div>
           </Card>
 
-          {/* QR Codes Modal */}
-          <Modal
-            title="Generated QR Codes"
-            open={qrCodesModalVisible}
-            onCancel={() => setQrCodesModalVisible(false)}
-            footer={[
-              <Button key="close" onClick={() => setQrCodesModalVisible(false)}>
-                Close
-              </Button>
-            ]}
-            width={900}
-            style={{ maxHeight: '80vh' }}
-            bodyStyle={{ maxHeight: '60vh', overflow: 'auto' }}
-          >
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              {qrCodes.map((qrCode, idx) => (
-                <div
-                  key={qrCode.key}
-                  style={{
-                    padding: '16px',
-                    border: '1px solid #e0e0e0',
-                    borderRadius: '8px',
-                    backgroundColor: '#fafafa',
-                    textAlign: 'center'
-                  }}
+          {/* Right: QR String and Generate Button */}
+          <Card 
+            style={{ flex: 0.6 }}
+            title="QR Code"
+            extra={
+              qrStrings.length > 0 ? (
+                <Button
+                  type="primary"
+                  size="small"
+                  icon={<QrcodeOutlined />}
+                  onClick={handleGenerateQRCodes}
+                  loading={generatingQRCodes}
                 >
-                  <div style={{ marginBottom: '12px' }}>
-                    <strong>{qrCode.productName}</strong>
-                    <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
-                      <code>{qrCode.qrString}</code>
-                    </div>
-                  </div>
-                  <div style={{ marginBottom: '12px' }}>
-                    <img
-                      src={qrCode.dataURL}
-                      alt={`QR Code ${idx + 1}`}
-                      style={{ maxWidth: '300px', height: 'auto' }}
-                    />
-                  </div>
+                  Generate
+                </Button>
+              ) : null
+            }
+          >
+            {qrStrings.length > 0 ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <div style={{ fontSize: '12px', fontWeight: '600' }}>
+                  {qrStrings[0]?.productName}
+                </div>
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                  <code style={{ 
+                    fontSize: '12px', 
+                    color: '#d4380d', 
+                    wordBreak: 'break-all',
+                    flex: 1,
+                    padding: '8px',
+                    backgroundColor: '#fafafa',
+                    borderRadius: '4px',
+                    maxHeight: '60px',
+                    overflow: 'auto'
+                  }}>
+                    {qrStrings[0]?.qrString}
+                  </code>
                   <Button
                     type="primary"
                     size="small"
+                    icon={<CopyOutlined />}
                     onClick={() => {
-                      const link = document.createElement('a')
-                      link.href = qrCode.dataURL
-                      link.download = `QRCode_${qrCode.productName}_${idx + 1}.png`
-                      link.click()
+                      navigator.clipboard.writeText(qrStrings[0]?.qrString)
+                      message.success('Copied')
                     }}
-                  >
-                    Download QR Code
-                  </Button>
+                  />
                 </div>
-              ))}
-            </div>
-          </Modal>
-        </Spin>
+              </div>
+            ) : (
+              <div style={{ color: '#999', fontSize: '12px', textAlign: 'center', padding: '20px 0' }}>
+                Select an order to generate QR
+              </div>
+            )}
+          </Card>
+        </div>
       )}
+
+      {/* QR Codes Modal */}
+      <Modal
+        title="Generated QR Codes"
+        open={qrCodesModalVisible}
+        onCancel={() => setQrCodesModalVisible(false)}
+        footer={[
+          <Button key="close" onClick={() => setQrCodesModalVisible(false)}>
+            Close
+          </Button>
+        ]}
+        width={1000}
+        style={{ maxHeight: '90vh' }}
+        bodyStyle={{ maxHeight: '70vh', overflow: 'auto' }}
+      >
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
+          {qrCodes.map((qrCode, idx) => (
+            <div
+              key={qrCode.key}
+              style={{
+                padding: '12px',
+                border: '1px solid #e0e0e0',
+                borderRadius: '8px',
+                backgroundColor: '#fafafa',
+                textAlign: 'center',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '8px'
+              }}
+            >
+              <div>
+                <strong style={{ fontSize: '12px' }}>{qrCode.productName}</strong>
+                <div style={{ fontSize: '10px', color: '#666', marginTop: '4px', wordBreak: 'break-all' }}>
+                  {qrCode.qrString}
+                </div>
+              </div>
+              <img
+                src={qrCode.dataURL}
+                alt={`QR Code ${idx + 1}`}
+                style={{ maxWidth: '100%', height: 'auto' }}
+              />
+              <Button
+                type="primary"
+                size="small"
+                block
+                onClick={() => {
+                  const link = document.createElement('a')
+                  link.href = qrCode.dataURL
+                  link.download = `QRCode_${qrCode.productName}_${idx + 1}.png`
+                  link.click()
+                }}
+              >
+                Download
+              </Button>
+            </div>
+          ))}
+        </div>
+      </Modal>
     </div>
   )
 }
