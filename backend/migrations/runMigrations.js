@@ -5,66 +5,76 @@ import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+// 重试连接数据库
+async function waitForDatabase(maxRetries = 30) {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      await db.one('SELECT 1');
+      console.log('✅ Database connection successful');
+      return true;
+    } catch (error) {
+      console.log(`⏳ Waiting for database... (${i + 1}/${maxRetries})`);
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+  }
+  throw new Error('Failed to connect to database after 30 seconds');
+}
+
 async function runMigrations() {
   try {
     console.log('Starting database migrations...');
 
-    // Create tables
+    // 等待数据库就绪
+    await waitForDatabase();
+
+    // Create tables - 与后端模型保持一致
     const migrations = [
+      // option_item_codes 表 - 口味代码管理
       `
-        CREATE TABLE IF NOT EXISTS flavors (
-          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-          flavor_code VARCHAR(20) UNIQUE NOT NULL,
-          flavor_name VARCHAR(255) NOT NULL,
-          group_name VARCHAR(100) NOT NULL,
-          product_system_id VARCHAR(255),
-          created_at TIMESTAMP DEFAULT NOW(),
-          updated_at TIMESTAMP DEFAULT NOW()
+        CREATE TABLE IF NOT EXISTS option_item_codes (
+          business_id VARCHAR(255) NOT NULL,
+          option_id VARCHAR(255) NOT NULL,
+          option_item_id VARCHAR(255) NOT NULL,
+          code VARCHAR(255) NOT NULL,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          PRIMARY KEY (business_id, option_item_id)
         );
-        CREATE INDEX IF NOT EXISTS idx_flavors_code ON flavors(flavor_code);
-        CREATE INDEX IF NOT EXISTS idx_flavors_group ON flavors(group_name);
+        CREATE INDEX IF NOT EXISTS idx_option_id ON option_item_codes(option_id);
       `,
+      // qr_templates 表 - QR模板管理
       `
         CREATE TABLE IF NOT EXISTS qr_templates (
-          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          id VARCHAR(255) PRIMARY KEY,
+          business_id VARCHAR(255) NOT NULL,
           name VARCHAR(255) NOT NULL,
-          template_pattern TEXT NOT NULL,
-          description TEXT,
+          template_json JSONB NOT NULL,
           is_active BOOLEAN DEFAULT false,
-          created_at TIMESTAMP DEFAULT NOW(),
-          updated_at TIMESTAMP DEFAULT NOW()
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
-        CREATE INDEX IF NOT EXISTS idx_templates_active ON qr_templates(is_active);
+        CREATE INDEX IF NOT EXISTS idx_business_id ON qr_templates(business_id);
       `,
+      // product_codes 表 - 产品代码管理
       `
-        CREATE TABLE IF NOT EXISTS qr_protocols (
-          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-          serial VARCHAR(255) NOT NULL,
-          bill_no VARCHAR(255) NOT NULL,
-          barcode VARCHAR(255),
-          flavors TEXT,
-          sku VARCHAR(255),
-          quantity INTEGER,
-          price DECIMAL(10, 2),
-          protocol_string TEXT NOT NULL,
-          template_id UUID REFERENCES qr_templates(id),
-          created_at TIMESTAMP DEFAULT NOW(),
-          FOREIGN KEY (template_id) REFERENCES qr_templates(id) ON DELETE SET NULL
+        CREATE TABLE IF NOT EXISTS product_codes (
+          business_id VARCHAR(255) NOT NULL,
+          product_id VARCHAR(255) NOT NULL,
+          code VARCHAR(255) NOT NULL,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          PRIMARY KEY (business_id, product_id)
         );
-        CREATE INDEX IF NOT EXISTS idx_protocols_serial ON qr_protocols(serial);
-        CREATE INDEX IF NOT EXISTS idx_protocols_billno ON qr_protocols(bill_no);
-        CREATE INDEX IF NOT EXISTS idx_protocols_created ON qr_protocols(created_at);
+        CREATE INDEX IF NOT EXISTS idx_product_business_id ON product_codes(business_id);
       `,
+      // product_code_settings 表 - 产品代码开关设置
       `
-        CREATE TABLE IF NOT EXISTS sync_logs (
-          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-          sync_type VARCHAR(50),
-          status VARCHAR(20),
-          record_count INTEGER,
-          error_message TEXT,
-          created_at TIMESTAMP DEFAULT NOW()
+        CREATE TABLE IF NOT EXISTS product_code_settings (
+          business_id VARCHAR(255) PRIMARY KEY,
+          enabled BOOLEAN DEFAULT false,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
-        CREATE INDEX IF NOT EXISTS idx_sync_logs_created ON sync_logs(created_at);
       `
     ];
 
@@ -72,12 +82,13 @@ async function runMigrations() {
       await db.none(migration);
     }
 
-    console.log('Database migrations completed successfully');
+    console.log('✅ Database migrations completed successfully');
+    process.exit(0);
   } catch (error) {
-    console.error('Migration failed:', error);
-    throw error;
+    console.error('❌ Migration failed:', error.message);
+    process.exit(1);
   } finally {
-    pgp.end();
+    await pgp.end();
   }
 }
 

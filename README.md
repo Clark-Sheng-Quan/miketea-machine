@@ -1,3 +1,53 @@
+# 🍵 Milk Tea Machine Integration Module
+
+A complete milk tea machine integration module for POS system synchronization. Includes backend API service, web management dashboard, and automated database migration.
+
+**✨ One Command Launch:** `docker-compose up -d`
+
+---
+
+## 📊 Project Overview
+
+| Component | Technology | Port |
+|-----------|-----------|------|
+| Backend API | Node.js + Express | 3000 |
+| Frontend App | React + Vite | 3001 |
+| Database | PostgreSQL | 5432 |
+
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+- Docker & Docker Compose
+- OR: Node.js 18+, PostgreSQL 15+
+
+### With Docker (Recommended)
+
+```bash
+# Start all services with one command
+docker-compose up -d
+
+# View container status
+docker-compose ps
+
+# View logs
+docker-compose logs -f backend
+```
+
+**Access the application:**
+- 🌐 Frontend: http://localhost:3001
+- 🔧 Backend API: http://localhost:3000/health
+- 🗄️ Database: localhost:5432
+
+### Local Development (Without Docker)
+
+#### 1. Start Database
+```bash
+# Requires PostgreSQL installed locally
+createdb miketea_machine
+
+# OR use Docker for database only
 docker run -d \
   -e POSTGRES_DB=miketea_machine \
   -e POSTGRES_USER=postgres \
@@ -5,292 +55,254 @@ docker run -d \
   -p 5432:5432 \
   --name miketea-postgres \
   postgres:15-alpine
-  
-# Milk Tea Machine Integration Module
-
-完整的奶茶机器集成模块，包括后端集成服务器和Web管理后台，用于POS系统联动。
-
-## 项目结构
-
-```
-miketea-machine/
-├── backend/                 # Node.js + Express 后端
-│   ├── src/
-│   │   ├── config/         # 数据库配置
-│   │   ├── models/         # 数据模型
-│   │   ├── services/       # 业务逻辑
-│   │   ├── routes/         # API路由
-│   │   └── index.js        # 应用入口
-│   ├── migrations/         # 数据库迁移
-│   ├── package.json
-│   └── .env.example
-├── frontend/               # React + Vite 管理后台
-│   ├── src/
-│   │   ├── pages/         # 页面
-│   │   ├── services/      # API服务
-│   │   ├── App.jsx
-│   │   └── main.jsx
-│   ├── package.json
-│   ├── vite.config.js
-│   └── index.html
-└── README.md
 ```
 
-## 功能模块
-
-### 1. 后端模块
-
-#### 口味同步模块 (Flavor Synchronization)
-- 从产品系统获取所有产品
-- 自动提取选项和选项项（口味）
-- 去重和合并口味组
-- 维护统一的口味数据库
-- 定时自动同步
-
-#### 口味代码管理 (Flavor Code Management)
-- 生成稳定的口味代码 (I001, S001, T001等)
-- 即使名称更改也保持代码不变
-- 提供POS端口味代码列表
-- 后端编辑口味名称和代码
-
-#### 模板管理 (Template Management)
-- 存储和更新QR协议模板
-- 支持占位符: {serial}, {billNo}, {barcode}, {flavors}, {sku}, {quantity}, {price}
-- 验证模板结构
-- 为QR生成引擎提供模板
-
-#### QR协议生成 (QR Protocol Generation)
-- 接收POS订单数据
-- 替换模板占位符
-- 格式化口味代码
-- 返回最终的QR协议字符串
-
-#### POS集成 (POS Integration)
-- 提供POS端口味代码列表
-- 提供QR生成端点
-- 向POS隐藏协议逻辑
-- 保证向后兼容性
-
-### 2. 前端模块
-
-#### 仪表板 (Dashboard)
-- 系统统计信息
-- 最近生成的协议
-- 一键同步口味
-
-#### 口味管理 (Flavor Management)
-- 查看所有口味
-- 创建新口味
-- 编辑口味信息
-- 删除口味
-- 从产品系统同步
-
-#### 模板管理 (Template Management)
-- 查看所有模板
-- 创建自定义模板
-- 编辑模板
-- 删除模板
-- 激活/停用模板
-
-#### QR协议 (QR Protocol)
-- 生成QR码
-- 搜索历史协议
-- 查看协议详情
-
-## 快速开始
-
-### 前提条件
-- Node.js 16+
-- PostgreSQL 12+
-
-### 安装步骤
-
-#### 1. 后端安装
-
+#### 2. Start Backend
 ```bash
 cd backend
 npm install
 cp .env.example .env
-# 编辑 .env 配置数据库
 npm run db:migrate
-npm run db:seed
-npm start
+npm run dev
 ```
 
-后端将运行在 `http://localhost:3000`
-
-#### 2. 前端安装
-
+#### 3. Start Frontend
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
 
-前端将运行在 `http://localhost:3001`
+---
 
-## API文档
+## 📁 Project Structure
 
-### POS集成端点
-
-#### 获取口味列表
 ```
-GET /api/pos/flavors
-
-Response:
-{
-  "success": true,
-  "data": [
-    {
-      "flavor_code": "I001",
-      "flavor_name": "Ice",
-      "group_name": "Temperature"
-    },
-    ...
-  ]
-}
-```
-
-#### 生成QR协议
-```
-POST /api/pos/generate-qr
-
-Request:
-{
-  "serial": "TEA001",
-  "billNo": "20240101001",
-  "barcode": "1234567890",
-  "flavors": ["I001", "S001", "O001"],
-  "sku": "TEAL001",
-  "quantity": 1,
-  "price": 5.99
-}
-
-Response:
-{
-  "success": true,
-  "protocol": "{serial}|{billNo}|{barcode}|I001,S001,O001|TEAL001",
-  "qrData": {...}
-}
+miketea-machine/
+├── backend/
+│   ├── src/
+│   │   ├── config/database.js       # Database configuration
+│   │   ├── models/                  # Data models
+│   │   │   ├── OptionItemCode.js    # Flavor code model
+│   │   │   ├── Template.js          # QR template model
+│   │   │   ├── ProductCode.js       # Product code model
+│   │   │   └── ProductCodeSwitch.js # Product code switch
+│   │   ├── routes/
+│   │   │   └── posServiceRoutes.js  # 16 API endpoints
+│   │   └── index.js                 # Application entry
+│   ├── migrations/
+│   │   └── runMigrations.js         # Database migration script
+│   ├── Dockerfile
+│   └── package.json
+│
+├── frontend/
+│   ├── src/
+│   │   ├── pages/
+│   │   │   ├── Login.jsx            # Login page
+│   │   │   ├── OptionsManagement.jsx
+│   │   │   ├── ProductCodeManagement.jsx
+│   │   │   └── QRProtocol.jsx
+│   │   ├── services/api.js          # API client
+│   │   ├── App.jsx
+│   │   └── main.jsx
+│   ├── Dockerfile
+│   └── package.json
+│
+├── docker-compose.yml               # Docker compose configuration
+└── README.md
 ```
 
-#### 生成QR图像
+---
+
+## 🎯 Core Features
+
+### Flavor Code Management
+- Create and edit flavor codes (I001, S001, T001, etc.)
+- Fetch flavor list from POS system
+- Persistent codes that remain unchanged even if flavor names change
+
+### QR Protocol Generation
+- Custom QR protocol formula editor
+- Generate QR code images
+- Support for placeholders: `#{productCode}`, `#{optionCodes}`, etc.
+
+### Product Code Management
+- Manage product codes
+- Enable/disable product code switch
+- Full CRUD operations
+
+### Automated Database Migration
+- Automatically creates tables and indexes on startup
+- No manual SQL scripts required
+- Version control friendly
+
+---
+
+## 🔌 API Endpoints (16 Total)
+
+### POS Authentication (2)
+- `POST /api/service/pos/login` - POS system login
+- `POST /api/service/pos/request` - Generic proxy request
+
+### Flavor Codes (3)
+- `POST /api/service/pos/item-codes/save` - Save flavor codes
+- `GET /api/service/pos/item-codes/:business_id` - Get all codes
+- `GET /api/service/pos/item-codes/:business_id/option/:option_id` - Get codes by option
+
+### QR Protocol (2)
+- `GET /api/service/qr-protocol/formula` - Get QR formula
+- `POST /api/service/qr-protocol/formula` - Save QR formula
+
+### Product Codes (3)
+- `GET /api/service/pos/product-codes` - Get product codes
+- `POST /api/service/pos/product-codes` - Save product code
+- `DELETE /api/service/pos/product-codes/:product_id` - Delete product code
+
+### Product Code Switch (2)
+- `GET /api/service/pos/product-code-switch` - Get switch status
+- `POST /api/service/pos/product-code-switch` - Update switch status
+
+### Data Sync (2)
+- `GET /api/service/pos/options` - Get options list
+- `GET /api/service/pos/sync-qr-data` - Sync all QR data
+
+See [Backend API Documentation](backend/README.md) for details.
+
+---
+
+## 🗄️ Database Tables
+
+Automatically created tables:
+
+| Table Name | Purpose |
+|-----------|---------|
+| `option_item_codes` | Flavor code storage |
+| `qr_templates` | QR protocol templates |
+| `product_codes` | Product code storage |
+| `product_code_settings` | Product code switch status |
+
+---
+
+## 🔧 Configuration
+
+### Environment Variables (backend/.env)
+
+```bash
+# Server
+NODE_ENV=production
+PORT=3000
+
+# Database
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=miketea_machine
+DB_USER=postgres
+DB_PASSWORD=postgres123
+
+# POS API
+POS_API_BASE=https://dev.vend88.com
+
+# Frontend Configuration (frontend/.env)
+REACT_APP_API_URL=http://localhost:3000/api
 ```
-POST /api/pos/generate-qr-image
 
-Request:
-{
-  "protocol_string": "{protocol_string}"
-}
+---
 
-Response:
-{
-  "success": true,
-  "qrImage": "data:image/png;base64,..."
-}
+## 📝 Common Commands
+
+```bash
+# Start
+docker-compose up -d
+
+# Stop (preserve data)
+docker-compose down
+
+# Stop and remove all data
+docker-compose down -v
+
+# View logs
+docker-compose logs -f backend
+docker-compose logs -f frontend
+
+# Rebuild and restart
+docker-compose up -d --build
+
+# Enter container
+docker-compose exec backend sh
+docker-compose exec postgres psql -U postgres miketea_machine
 ```
 
-### 管理端点
+---
 
-#### 获取统计信息
-```
-GET /api/admin/stats
+## 🚀 Production Deployment
 
-Response:
-{
-  "success": true,
-  "data": {
-    "totalFlavors": 10,
-    "totalTemplates": 2,
-    "totalProtocols": 100,
-    "recentProtocols": [...]
-  }
-}
-```
+### Option 1: Integrate into Existing POS Website
+- Copy frontend code to existing project
+- Add milk tea module to routing
 
-#### 系统健康检查
-```
-GET /api/admin/health
+### Option 2: Independent Deployment
+- Deploy backend to server
+- Configure Nginx reverse proxy
+- Build frontend as static files
 
-Response:
-{
-  "success": true,
-  "status": "healthy",
-  "database": "connected"
-}
-```
+### Option 3: Container Deployment
+- Launch with Docker Compose on server
+- Configure HTTPS and domain
+- Setup database backups
 
-## 数据库Schema
+---
 
-### flavors表
-```sql
-CREATE TABLE flavors (
-  id UUID PRIMARY KEY,
-  flavor_code VARCHAR(20) UNIQUE,
-  flavor_name VARCHAR(255),
-  group_name VARCHAR(100),
-  product_system_id VARCHAR(255),
-  created_at TIMESTAMP,
-  updated_at TIMESTAMP
-);
+## 🐛 Troubleshooting
+
+### Container won't start
+```bash
+# View error logs
+docker-compose logs backend
+
+# Check if ports are in use
+lsof -i :3000
+lsof -i :3001
+lsof -i :5432
 ```
 
-### qr_templates表
-```sql
-CREATE TABLE qr_templates (
-  id UUID PRIMARY KEY,
-  name VARCHAR(255),
-  template_pattern TEXT,
-  description TEXT,
-  is_active BOOLEAN,
-  created_at TIMESTAMP,
-  updated_at TIMESTAMP
-);
+### Database connection failed
+```bash
+# Check container status
+docker-compose ps
+
+# Restart database
+docker-compose restart postgres
 ```
 
-### qr_protocols表
-```sql
-CREATE TABLE qr_protocols (
-  id UUID PRIMARY KEY,
-  serial VARCHAR(255),
-  bill_no VARCHAR(255),
-  barcode VARCHAR(255),
-  flavors TEXT,
-  sku VARCHAR(255),
-  quantity INTEGER,
-  price DECIMAL(10, 2),
-  protocol_string TEXT,
-  template_id UUID,
-  created_at TIMESTAMP
-);
+### Migration script failed
+```bash
+# View full error
+docker-compose logs -f backend | grep -i migration
+
+# Delete old container and restart
+docker-compose down -v
+docker-compose up -d
 ```
 
-## 环境变量配置
+---
 
-参见 `backend/.env.example`
+## 📚 Documentation
 
-关键配置:
-- `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`: PostgreSQL连接
-- `PRODUCT_SYSTEM_API_URL`: 产品系统API地址
-- `PRODUCT_SYSTEM_API_KEY`: 产品系统API密钥
-- `FLAVOR_SYNC_INTERVAL`: 口味同步间隔（毫秒）
-- `FLAVOR_SYNC_ENABLED`: 是否启用自动同步
+- [Backend Development Guide](backend/README.md)
+- [Frontend Development Guide](frontend/README.md)
 
-## 开发建议
+---
 
-1. **口味同步**: 首次运行后端时，会自动同步产品系统中的口味
-2. **模板管理**: 至少创建一个活跃模板才能生成QR协议
-3. **API密钥**: 生产环境中请修改.env文件中的敏感信息
-4. **数据库备份**: 定期备份PostgreSQL数据库
+## 💡 Development Recommendations
 
-## 未来扩展
+1. **Local Development**: Use `docker-compose up -d` for dependencies, run frontend/backend with `npm run dev` separately
+2. **Production Deployment**: Use complete Docker Compose configuration
+3. **Database Backups**: Regularly backup PostgreSQL data
+4. **API Testing**: Use Postman or Insomnia to test APIs
+5. **Logging**: Enable Docker log persistence
 
-- 机器状态监控
-- 错误报告系统
-- 自动分配集成
-- 实时订单跟踪
-- 通知和告警系统
+---
 
-## License
+## 📄 License
 
 MIT
