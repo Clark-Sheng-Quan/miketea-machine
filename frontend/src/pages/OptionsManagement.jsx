@@ -98,9 +98,6 @@ export default function OptionsManagement() {
 
       const response = await itemCodesAPI.save(POS_BUSINESS_ID, validCodes);
       
-      if (response.data.success) {
-        message.success(`Saved ${validCodes.length} item codes`);
-      }
     } catch (error) {
       message.error(error.response?.data?.message || 'Failed to save item codes');
       console.error(error);

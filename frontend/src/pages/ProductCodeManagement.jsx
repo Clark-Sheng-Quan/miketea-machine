@@ -76,7 +76,7 @@ export default function ProductCodeManagement() {
       const response = await productCodesAPI.setSwitch(POS_BUSINESS_ID, checked)
       if (response.data.success) {
         setSwitchEnabled(checked)
-        message.success(checked ? 'Product Code enabled' : 'Product Code disabled')
+        
         
         // Load products if just enabled
         if (checked) {
@@ -160,7 +160,6 @@ export default function ProductCodeManagement() {
           ...prev,
           [currentProduct.product_id]: currentCode
         }))
-        message.success('Product code saved successfully')
       }
     } catch (error) {
       console.error('Error saving product code:', error)
@@ -184,27 +183,28 @@ export default function ProductCodeManagement() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', flex: 1, minHeight: 0, height: '100%' }}>
       {/* Top: Switch Section */}
       <div style={{ padding: '16px', border: '1px solid #e0e0e0', borderRadius: '8px', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <span style={{ fontSize: '14px', fontWeight: '600', color: '#333' }}>
-            Enable Product Code
-          </span>
-          <Switch
-            checked={switchEnabled}
-            onChange={handleSwitchChange}
-            loading={loadingSwitch}
-            disabled={loadingSwitch}
-          />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <span style={{ fontSize: '14px', fontWeight: '600', color: '#333' }}>
+              Enable Product Code
+            </span>
+            <Switch
+              checked={switchEnabled}
+              onChange={handleSwitchChange}
+              loading={loadingSwitch}
+              disabled={loadingSwitch}
+            />
+          </div>
+          {!switchEnabled && (
+            <span style={{ fontSize: '15px', fontWeight: '500', color: '#666', marginLeft: '12px', padding: '4px 8px', background: '#f5f5f5', borderRadius: '4px' }}>
+              Using raw Product ID - Enable to use Product Code
+            </span>
+          )}
         </div>
         <span style={{ fontSize: '12px', color: '#999' }}>
           {switchEnabled ? 'Active' : 'Inactive'}
         </span>
       </div>
-
-      {!switchEnabled && (
-        <div style={{ padding: '12px', background: '#fff7e6', border: '1px solid #ffe58f', borderRadius: '8px', color: '#ff7a45', fontSize: '13px', flexShrink: 0 }}>
-          ⚠️ Product Code is currently disabled. Enable the switch above to manage product codes.
-        </div>
-      )}
 
       {/* Main Content */}
       <div style={{ display: 'flex', gap: '16px', flex: 1, opacity: switchEnabled ? 1 : 0.5, pointerEvents: switchEnabled ? 'auto' : 'none', minHeight: 0 }}>

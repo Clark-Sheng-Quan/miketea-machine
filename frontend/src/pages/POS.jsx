@@ -33,7 +33,6 @@ export default function POS() {
         // Reload formula after sync
         const loadedFormula = await loadQRFormula()
         setFormula(loadedFormula)
-        message.success('Data synced successfully from API')
       } else {
         message.error('Failed to sync data from API')
       }
@@ -68,7 +67,6 @@ export default function POS() {
       
       setQrCodes(qrCodesData)
       setQrCodesModalVisible(true)
-      message.success('QR codes generated successfully')
     } catch (error) {
       console.error('Failed to generate QR codes:', error)
       message.error('Failed to generate QR codes')
@@ -106,7 +104,6 @@ export default function POS() {
       const data = await response.json()
       const normalizedData = normalizePOSData(data)
       setOrderData(normalizedData)
-      message.success('Loaded POS Orders')
     } catch (error) {
       message.error(`Failed to load POS Orders: ${error.message}`)
       console.error(error)
@@ -294,7 +291,6 @@ export default function POS() {
                     icon={<CopyOutlined />}
                     onClick={() => {
                       navigator.clipboard.writeText(qrStrings[0]?.qrString)
-                      message.success('Copied')
                     }}
                   />
                 </div>
@@ -322,7 +318,7 @@ export default function POS() {
         style={{ maxHeight: '90vh' }}
         bodyStyle={{ maxHeight: '70vh', overflow: 'auto' }}
       >
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '16px' }}>
           {qrCodes.map((qrCode, idx) => (
             <div
               key={qrCode.key}
@@ -334,10 +330,11 @@ export default function POS() {
                 textAlign: 'center',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '8px'
+                gap: '12px',
+                alignItems: 'center'
               }}
             >
-              <div>
+              <div style={{ width: '100%' }}>
                 <strong style={{ fontSize: '12px' }}>{qrCode.productName}</strong>
                 <div style={{ fontSize: '10px', color: '#666', marginTop: '4px', wordBreak: 'break-all' }}>
                   {qrCode.qrString}
@@ -346,21 +343,8 @@ export default function POS() {
               <img
                 src={qrCode.dataURL}
                 alt={`QR Code ${idx + 1}`}
-                style={{ maxWidth: '100%', height: 'auto' }}
+                style={{ maxWidth: '300px', height: '300px' }}
               />
-              <Button
-                type="primary"
-                size="small"
-                block
-                onClick={() => {
-                  const link = document.createElement('a')
-                  link.href = qrCode.dataURL
-                  link.download = `QRCode_${qrCode.productName}_${idx + 1}.png`
-                  link.click()
-                }}
-              >
-                Download
-              </Button>
             </div>
           ))}
         </div>
