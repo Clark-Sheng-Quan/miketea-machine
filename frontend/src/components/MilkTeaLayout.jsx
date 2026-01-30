@@ -3,7 +3,7 @@ import './MilkTeaLayout.css'
 import OptionsManagement from '../pages/OptionsManagement'
 import QRProtocol from '../pages/QRProtocol'
 import ProductCodeManagement from '../pages/ProductCodeManagement'
-import POS from '../pages/POS'
+// import POS from '../pages/POS'
 
 export default function MilkTeaLayout() {
   const [activeTab, setActiveTab] = useState('option-code')
@@ -62,26 +62,25 @@ export default function MilkTeaLayout() {
                       <div style={{ width: '100%', position: 'sticky', top: 0, zIndex: 5, flexShrink: 0 }}>
                         <div className="Styling_NavigationContainer" style={{ minHeight: '50px', display: 'flex', alignItems: 'center', background: 'white', borderBottom: '1px solid rgba(0, 0, 0, 0.05)', boxShadow: 'rgba(0, 0, 0, 0.05) 0px 1px 3px' }}>
                           <div style={{ display: 'flex', minHeight: '60px', gap: 0, paddingRight: '30px' }}>
-                            {['Option Code', 'Product Code', 'QR Protocol', 'POS'].map((tab, idx) => (
+                            {['Option Code', 'Product Code', 'QR Protocol'].map((tab, idx) => (
                               <div
                                 key={idx}
                                 className={`Styling_item_Container ${
                                   idx === 0 ? (activeTab === 'option-code' ? 'active' : '') : 
                                   idx === 1 ? (activeTab === 'product-code' ? 'active' : '') :
-                                  idx === 2 ? (activeTab === 'qr-protocol' ? 'active' : '') :
-                                  (activeTab === 'pos' ? 'active' : '')
+                                  (activeTab === 'qr-protocol' ? 'active' : '')
                                 }`}
-                                onClick={() => setActiveTab(idx === 0 ? 'option-code' : idx === 1 ? 'product-code' : idx === 2 ? 'qr-protocol' : 'pos')}
+                                onClick={() => setActiveTab(idx === 0 ? 'option-code' : idx === 1 ? 'product-code' : 'qr-protocol')}
                                 style={{
                                   fontSize: '15px',
                                   background: 'white',
                                   border: '0.1px solid rgba(0, 0, 0, 0.1)',
                                   padding: '12px 20px',
                                   cursor: 'pointer',
-                                  borderBottom: activeTab === (idx === 0 ? 'option-code' : idx === 1 ? 'product-code' : idx === 2 ? 'qr-protocol' : 'pos') ? '3px solid #007aff' : 'none',
+                                  borderBottom: activeTab === (idx === 0 ? 'option-code' : idx === 1 ? 'product-code' : 'qr-protocol') ? '3px solid #007aff' : 'none',
                                   transition: 'all 0.2s',
-                                  color: activeTab === (idx === 0 ? 'option-code' : idx === 1 ? 'product-code' : idx === 2 ? 'qr-protocol' : 'pos') ? '#000' : '#888',
-                                  fontWeight: activeTab === (idx === 0 ? 'option-code' : idx === 1 ? 'product-code' : idx === 2 ? 'qr-protocol' : 'pos') ? '600' : '500',
+                                  color: activeTab === (idx === 0 ? 'option-code' : idx === 1 ? 'product-code' : 'qr-protocol') ? '#000' : '#888',
+                                  fontWeight: activeTab === (idx === 0 ? 'option-code' : idx === 1 ? 'product-code' : 'qr-protocol') ? '600' : '500',
                                   display: 'flex',
                                   alignItems: 'center',
                                   justifyContent: 'center',
@@ -91,6 +90,27 @@ export default function MilkTeaLayout() {
                                 {tab}
                               </div>
                             ))}
+                            {/* <div
+                                className={`Styling_item_Container ${activeTab === 'pos' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('pos')}
+                                style={{
+                                  fontSize: '15px',
+                                  background: 'white',
+                                  border: '0.1px solid rgba(0, 0, 0, 0.1)',
+                                  padding: '12px 20px',
+                                  cursor: 'pointer',
+                                  borderBottom: activeTab === 'pos' ? '3px solid #007aff' : 'none',
+                                  transition: 'all 0.2s',
+                                  color: activeTab === 'pos' ? '#000' : '#888',
+                                  fontWeight: activeTab === 'pos' ? '600' : '500',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  whiteSpace: 'nowrap'
+                                }}
+                              >
+                                POS
+                              </div> */}
                           </div>
                         </div>
                       </div>
@@ -100,7 +120,7 @@ export default function MilkTeaLayout() {
                         {activeTab === 'option-code' && <OptionsManagement />}
                         {activeTab === 'product-code' && <ProductCodeManagement />}
                         {activeTab === 'qr-protocol' && <QRProtocol />}
-                        {activeTab === 'pos' && <POS />}
+                        {/* {activeTab === 'pos' && <POS />} */}
                       </div>
                     </div>
                   </div>

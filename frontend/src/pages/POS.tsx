@@ -1,5 +1,5 @@
 import React, { useState, ChangeEvent, CSSProperties } from 'react'
-import { Button, Select, message, Tag, Modal, Card, SelectProps } from 'antd'
+import { Button, Select, message, Tag, Modal, Card, SelectProps, Collapse } from 'antd'
 import { UploadOutlined, CopyOutlined, QrcodeOutlined } from '@ant-design/icons'
 import {
   loadQRFormula,
@@ -198,17 +198,52 @@ export default function POS() {
               
               {selectedOrder !== null && orderData?.orders[selectedOrder] && (
                 <div style={{ padding: '12px', backgroundColor: '#f5f5f5', borderRadius: '4px', fontSize: '12px' }}>
-                  <div style={{ marginBottom: '8px' }}>
-                    <strong>Order:</strong> <code>{orderData.orders[selectedOrder]._id.slice(0, 16)}...</code>
+                  <div style={{ marginBottom: '12px' }}>
+                    <strong>Order:</strong> <code style={{ marginLeft: '8px' }}>{orderData.orders[selectedOrder]._id.slice(0, 16)}...</code>
                   </div>
-                  <div>
-                    <strong>Products:</strong>
-                    {orderData.orders[selectedOrder].products.map((p: any, idx: number) => (
-                      <div key={idx} style={{ marginLeft: '12px', fontSize: '11px', marginTop: '4px' }}>
-                        • {p.name} ({countValidOptionItems(p)} options)
-                      </div>
-                    ))}
-                  </div>
+                  <Collapse
+                    items={orderData.orders[selectedOrder].products.map((p: any, idx: number) => ({
+                      key: idx.toString(),
+                      label: (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px' }}>
+                          <span>📦 {p.name}</span>
+                          <Tag color="blue" style={{ fontSize: '10px' }}>({countValidOptionItems(p)} options)</Tag>
+                        </div>
+                      ),
+                      children: (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', paddingTop: '8px', borderTop: '1px solid rgba(0,0,0,0.1)' }}>
+                          <div><strong>SKU:</strong> {p.sku || 'N/A'}</div>
+                          <div><strong>ID:</strong> <code>{p._id}</code></div>
+                          {p.options && p.options.length > 0 && (
+                            <div>
+                              <strong>Valid Options (with qty):</strong>
+                              <div style={{ marginLeft: '12px', marginTop: '4px' }}>
+                                {p.options
+                                  .map((opt: any) => ({
+                                    ...opt,
+                                    validItems: opt.option_items?.filter((item: any) => item.qty && item.qty > 0) || []
+                                  }))
+                                  .filter((opt: any) => opt.validItems.length > 0)
+                                  .map((opt: any, optIdx: number) => (
+                                    <div key={optIdx} style={{ marginBottom: '6px', fontSize: '11px' }}>
+                                      <strong>{opt.name}</strong>
+                                      <div style={{ marginLeft: '8px', color: '#666' }}>
+                                        {opt.validItems.map((item: any, itemIdx: number) => (
+                                          <div key={itemIdx}>
+                                            • {item.name || item.value || 'N/A'} (qty: {item.qty})
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )
+                    }))}
+                    accordion
+                  />
                 </div>
               )}
             </div>
