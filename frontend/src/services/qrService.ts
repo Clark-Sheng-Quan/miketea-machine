@@ -5,7 +5,8 @@
 
 import QRCode from 'qrcode'
 
-const BUSINESS_ID = '67295c445242136caa4511d4'
+const BUSINESS_ID = ''
+const token = ''
 
 // Local storage keys
 const STORAGE_KEYS = {

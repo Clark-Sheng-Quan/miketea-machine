@@ -34,6 +34,7 @@ export default function QRProtocol() {
   const [savedFormula, setSavedFormula] = useState('ORD|#{productCode}|#{optionCode},#{optionCode}')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [saveSuccess, setSaveSuccess] = useState(false)
 
   // 页面加载时从数据库获取公式
   useEffect(() => {
@@ -154,6 +155,7 @@ export default function QRProtocol() {
     
     try {
       setSaving(true)
+      setSaveSuccess(false)
       
       // 保存到数据库
       const response = await qrProtocolAPI.saveFormula(POS_BUSINESS_ID, correctedFormula)
@@ -164,6 +166,9 @@ export default function QRProtocol() {
         setSavedFormula(correctedFormula)
         setParameters(extractParameters(correctedFormula))
         
+        // 显示成功状态
+        setSaveSuccess(true)
+        setTimeout(() => setSaveSuccess(false), 2000)
       }
     } catch (error) {
       console.error('Failed to save formula:', error)
@@ -250,14 +255,19 @@ export default function QRProtocol() {
 
         {/* Save and Use Button */}
         <Button
-          type="primary"
+          type={saveSuccess ? 'primary' : 'primary'}
           onClick={handleSaveAndUse}
           loading={saving}
           disabled={saving}
-          style={{ marginBottom: '20px' }}
+          style={{ 
+            marginBottom: '20px',
+            backgroundColor: saveSuccess ? '#52c41a' : undefined,
+            borderColor: saveSuccess ? '#52c41a' : undefined,
+            transition: 'all 0.3s ease'
+          }}
           size="large"
         >
-          {saving ? 'Saving...' : 'Save and Use Formula'}
+          {saving ? 'Saving...' : saveSuccess ? '✓ Saved!' : 'Save and Use Formula'}
         </Button>
 
         {/* Available Parameters */}
