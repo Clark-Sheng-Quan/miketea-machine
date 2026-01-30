@@ -91,21 +91,11 @@ export default function ProductCodeManagement() {
     }
   }
 
-  // Load products and existing codes from database
+  // Load products with pagination (without loading all codes)
   const loadProductsAndCodes = async (pageIdx = 0) => {
     try {
       setLoading(true)
       setLoadingProducts(true)
-
-      // Fetch existing product codes from database
-      const codesResponse = await productCodesAPI.getAll(POS_BUSINESS_ID)
-      const codesMap = {}
-      if (codesResponse.data.success && codesResponse.data.data) {
-        codesResponse.data.data.forEach(item => {
-          codesMap[item.product_id] = item.code
-        })
-      }
-      setProductCodes(codesMap)
 
       // Search products from POS API with pagination
       const response = await posAuthAPI.searchProducts(token, POS_BUSINESS_ID, pageSize, pageIdx)
@@ -134,10 +124,22 @@ export default function ProductCodeManagement() {
     }
   }
 
-  // Select product
-  const handleSelectProduct = (product) => {
+  // Select product and load its code
+  const handleSelectProduct = async (product) => {
     setCurrentProduct(product)
-    setCurrentCode(productCodes[product.product_id] || '')
+    
+    // Load the code for this specific product
+    try {
+      const response = await productCodesAPI.searchByProduct(POS_BUSINESS_ID, product.product_id)
+      if (response.data.success && response.data.data && response.data.data.length > 0) {
+        setCurrentCode(response.data.data[0].code || '')
+      } else {
+        setCurrentCode('')
+      }
+    } catch (error) {
+      console.error('Error loading product code:', error)
+      setCurrentCode('')
+    }
   }
 
   // Save product code
@@ -168,26 +170,6 @@ export default function ProductCodeManagement() {
     }
   }
 
-  // Delete product code
-  const handleDeleteCode = async () => {
-    if (!currentProduct) return
-
-    try {
-      const response = await productCodesAPI.delete(POS_BUSINESS_ID, currentProduct.product_id)
-      if (response.data.success) {
-        setProductCodes(prev => {
-          const newCodes = { ...prev }
-          delete newCodes[currentProduct.product_id]
-          return newCodes
-        })
-        setCurrentCode('')
-        message.success('Product code deleted successfully')
-      }
-    } catch (error) {
-      console.error('Error deleting product code:', error)
-      message.error('Failed to delete product code')
-    }
-  }
 
   // Render loading state
   if (loading) {
@@ -227,14 +209,14 @@ export default function ProductCodeManagement() {
       {/* Main Content */}
       <div style={{ display: 'flex', gap: '16px', flex: 1, opacity: switchEnabled ? 1 : 0.5, pointerEvents: switchEnabled ? 'auto' : 'none', minHeight: 0 }}>
         {/* Left: Products List */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', border: '1px solid #e0e0e0', borderRadius: '8px', background: 'white', minHeight: 0 }}>
+        <div style={{ height: '78vh', flex: 1, display: 'flex', flexDirection: 'column', border: '1px solid #e0e0e0', borderRadius: '8px', background: 'white', minHeight: 0 }}>
           <div style={{ padding: '16px', borderBottom: '1px solid #f0f0f0' }}>
             <div style={{ fontSize: '14px', fontWeight: '600', color: '#333' }}>
               Products
             </div>
           </div>
 
-          <div style={{ height: '90vh', overflowY: 'auto', padding: '12px', minHeight: 0 }}>
+          <div style={{ height: '78vh',overflowY: 'auto', padding: '12px', minHeight: 0 }}>
             <Spin spinning={loadingProducts}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {products.map((product) => (
@@ -260,14 +242,9 @@ export default function ProductCodeManagement() {
                       }
                     }}
                   >
-                    <div style={{ fontSize: '14px', fontWeight: '500', marginBottom: '4px', color: '#333' }}>
+                    <div style={{ fontSize: '14px', fontWeight: '500', color: '#333' }}>
                       {product.name}
                     </div>
-                    {productCodes[product.product_id] && (
-                      <div style={{ fontSize: '12px', color: '#1890ff', fontWeight: '500' }}>
-                        Code: {productCodes[product.product_id]}
-                      </div>
-                    )}
                   </div>
                 ))}
               </div>
@@ -276,7 +253,7 @@ export default function ProductCodeManagement() {
 
           {/* Pagination Controls */}
           {maxPage > 0 && (
-            <div style={{ padding: '12px', borderTop: '1px solid #f0f0f0', background: '#fafafa', flexShrink: 0 }}>
+            <div style={{ padding: '16px', borderTop: '1px solid #f0f0f0', background: 'white', flexShrink: 0 }}>
               <div style={{ display: 'flex', gap: '4px', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap' }}>
                 <Button
                   disabled={currentPage === 0 || loadingProducts}
@@ -346,7 +323,7 @@ export default function ProductCodeManagement() {
         </div>
 
         {/* Right: Product Code Editor */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', border: '1px solid #e0e0e0', borderRadius: '8px', background: 'white', minHeight: 0 }}>
+        <div style={{ height: '78vh', flex: 1, display: 'flex', flexDirection: 'column', border: '1px solid #e0e0e0', borderRadius: '8px', background: 'white', minHeight: 0 }}>
           {currentProduct ? (
             <>
               <div style={{ padding: '16px', borderBottom: '1px solid #f0f0f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -387,15 +364,7 @@ export default function ProductCodeManagement() {
                   size="large"
                   style={{ marginBottom: '8px' }}
                 />
-                {productCodes[currentProduct.product_id] && (
-                  <Button
-                    danger
-                    block
-                    onClick={handleDeleteCode}
-                  >
-                    Delete Code
-                  </Button>
-                )}
+
               </div>
             </div>
           </>

@@ -118,7 +118,7 @@ export default function OptionsManagement() {
         </div>
 
         <Spin spinning={loading}>
-          <div style={{ height: '75vh', overflowY: 'auto', border: '1px solid #e0e0e0', borderRadius: '8px', background: 'white' }}>
+          <div style={{ height: '80vh', overflowY: 'auto', border: '1px solid #e0e0e0', borderRadius: '8px', background: 'white' }}>
             {options.length === 0 ? (
               <div style={{ padding: '20px', textAlign: 'center', color: '#999' }}>
                 No options found
@@ -221,7 +221,7 @@ export default function OptionsManagement() {
       </div>
 
       {/* Right: Items Detail Editor */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', border: '1px solid #e0e0e0', borderRadius: '8px', background: 'white', minHeight: 0 }}>
+      <div style={{height: '82vh', flex: 1, display: 'flex', flexDirection: 'column', border: '1px solid #e0e0e0', borderRadius: '8px', background: 'white', minHeight: 0 }}>
         {currentOption ? (
           <>
             <div style={{ padding: '16px', borderBottom: '1px solid #f0f0f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

@@ -69,16 +69,21 @@ router.post('/login', async (req, res) => {
  * Get all options (flavors) from POS system with pagination
  * Query: { token, business_id, page_size, page_idx }
  */
-router.get('/options', async (req, res) => {
+router.get('/search_options', async (req, res) => {
   try {
-    const { token, business_id, page_size = '50', page_idx = '0' } = req.query;
+    // Get token from Authorization header
+    const authHeader = req.headers.authorization;
+    const token = authHeader ? authHeader.replace('Bearer ', '') : null;
+    
+    // Get other params from query
+    const { business_id, page_size = '50', page_idx = '0' } = req.query;
     const pageSize = parseInt(page_size);
     const pageIdx = parseInt(page_idx);
 
     if (!token) {
       return res.status(401).json({
         success: false,
-        message: 'Token is required'
+        message: 'Token is required in Authorization header'
       });
     }
 
@@ -152,16 +157,21 @@ router.get('/options', async (req, res) => {
  * Search products from POS system
  * Query: { token, business_id, page_size, page_idx }
  */
-router.get('/search-products', async (req, res) => {
+router.get('/search_products', async (req, res) => {
   try {
-    const { token, business_id, page_size = '20', page_idx = '0' } = req.query;
+    // Get token from Authorization header
+    const authHeader = req.headers.authorization;
+    const token = authHeader ? authHeader.replace('Bearer ', '') : null;
+    
+    // Get other params from query
+    const { business_id, page_size = '20', page_idx = '0' } = req.query;
     const pageSize = parseInt(page_size);
     const pageIdx = parseInt(page_idx);
 
     if (!token) {
       return res.status(401).json({
         success: false,
-        message: 'Token is required'
+        message: 'Token is required in Authorization header'
       });
     }
 
@@ -222,138 +232,13 @@ router.get('/search-products', async (req, res) => {
   }
 });
 
-/**
- * POST /api/service/pos/request
- * Generic POS API request proxy
- * Frontend sends request with token in body
- * Body: { token, method, endpoint, data }
- */
-router.post('/request', async (req, res) => {
-  try {
-    const { token, method = 'GET', endpoint, data = null } = req.body;
-
-    if (!token) {
-      return res.status(401).json({
-        success: false,
-        message: 'Token is required'
-      });
-    }
-
-    if (!endpoint) {
-      return res.status(400).json({
-        success: false,
-        message: 'Endpoint is required'
-      });
-    }
-
-    console.log(`[PosService] Proxying ${method} request to ${endpoint}`);
-
-    // Create authenticated client
-    const client = axios.create({
-      baseURL: POS_API_BASE,
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
-      timeout: 10000
-    });
-
-    // Make request
-    let response;
-    switch (method.toUpperCase()) {
-      case 'GET':
-        response = await client.get(endpoint);
-        break;
-      case 'POST':
-        response = await client.post(endpoint, data);
-        break;
-      case 'PUT':
-        response = await client.put(endpoint, data);
-        break;
-      case 'DELETE':
-        response = await client.delete(endpoint);
-        break;
-      default:
-        return res.status(400).json({
-          success: false,
-          message: `Unsupported method: ${method}`
-        });
-    }
-
-    res.json({
-      success: true,
-      data: response.data
-    });
-  } catch (error) {
-    console.error('[PosService] Proxy request error:', error.message);
-
-    // Handle token expiration
-    if (error.response?.status === 401) {
-      return res.status(401).json({
-        success: false,
-        message: 'Token expired or invalid',
-        error: error.response?.data?.message
-      });
-    }
-
-    res.status(error.response?.status || 500).json({
-      success: false,
-      message: error.response?.data?.message || 'Request failed',
-      error: error.message
-    });
-  }
-});
 
 /**
- * POST /api/service/pos/products
- * Get products list from POS system
- * Body: { token }
- */
-router.post('/products', async (req, res) => {
-  try {
-    const { token } = req.body;
-
-    if (!token) {
-      return res.status(401).json({
-        success: false,
-        message: 'Token is required'
-      });
-    }
-
-    console.log('[PosService] Fetching products from POS');
-
-    const client = axios.create({
-      baseURL: POS_API_BASE,
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
-      timeout: 10000
-    });
-
-    const response = await client.get('/api/products');
-
-    res.json({
-      success: true,
-      data: response.data
-    });
-  } catch (error) {
-    console.error('[PosService] Fetch products error:', error.message);
-
-    res.status(error.response?.status || 500).json({
-      success: false,
-      message: 'Failed to fetch products',
-      error: error.message
-    });
-  }
-});
-
-/**
- * POST /api/service/pos/item-codes/save
+ * POST /api/tea_machine/save_optionCode
  * Save option item codes to database
  * Body: { business_id, item_codes: [{ optionId, optionItemId, code }, ...] }
  */
-router.post('/item-codes/save', async (req, res) => {
+router.post('/save_optionCode', async (req, res) => {
   try {
     const { business_id, item_codes } = req.body;
 
@@ -395,12 +280,13 @@ router.post('/item-codes/save', async (req, res) => {
 });
 
 /**
- * GET /api/service/pos/item-codes/:business_id
+ * GET /api/tea_machine/get_optionCode
  * Get all item codes for a business
+ * Query: { business_id }
  */
-router.get('/item-codes/:business_id', async (req, res) => {
+router.get('/get_optionCode', async (req, res) => {
   try {
-    const { business_id } = req.params;
+    const { business_id } = req.query;
 
     if (!business_id) {
       return res.status(400).json({
@@ -411,7 +297,7 @@ router.get('/item-codes/:business_id', async (req, res) => {
 
     console.log(`[PosService] Fetching item codes for business ${business_id}`);
 
-    const codes = await OptionItemCode.getItemCodesByBusinessId(business_id);
+    const codes = await OptionItemCode.getAllOptionCodes(business_id);
 
     res.json({
       success: true,
@@ -429,12 +315,13 @@ router.get('/item-codes/:business_id', async (req, res) => {
 });
 
 /**
- * GET /api/service/pos/item-codes/:business_id/option/:option_id
+ * GET /api/tea_machine/search_optionCode
  * Get item codes for a specific option
+ * Query: { business_id, option_id }
  */
-router.get('/item-codes/:business_id/option/:option_id', async (req, res) => {
+router.get('/search_optionCode', async (req, res) => {
   try {
-    const { business_id, option_id } = req.params;
+    const { business_id, option_id } = req.query;
 
     if (!business_id || !option_id) {
       return res.status(400).json({
@@ -463,11 +350,11 @@ router.get('/item-codes/:business_id/option/:option_id', async (req, res) => {
 });
 
 /**
- * GET /api/service/qr-protocol/formula
+ * GET /api/tea_machine/get_formula
  * Get current QR protocol formula for business
  * Query: { business_id }
  */
-router.get('/qr-protocol/formula', async (req, res) => {
+router.get('/get_formula', async (req, res) => {
   try {
     const { business_id } = req.query;
 
@@ -485,7 +372,7 @@ router.get('/qr-protocol/formula', async (req, res) => {
     
     if (!template) {
       // If no active template, get the most recent one
-      const templates = await Template.getByBusinessId(business_id);
+      const templates = await Template.getAllFormulas(business_id);
       if (templates.length === 0) {
         return res.json({
           success: true,
@@ -533,11 +420,11 @@ router.get('/qr-protocol/formula', async (req, res) => {
 });
 
 /**
- * POST /api/service/qr-protocol/formula
+ * POST /api/tea_machine/save_formula
  * Save QR protocol formula for business
  * Body: { business_id, formula }
  */
-router.post('/qr-protocol/formula', async (req, res) => {
+router.post('/save_formula', async (req, res) => {
   try {
     const { business_id, formula } = req.body;
 
@@ -559,13 +446,13 @@ router.post('/qr-protocol/formula', async (req, res) => {
     console.log('[QRProtocol] Formula:', formula);
 
     // Check if there's an existing template
-    const existingTemplates = await Template.getByBusinessId(business_id);
+    const existingTemplates = await Template.getAllFormulas(business_id);
     
     let result;
     if (existingTemplates.length > 0) {
       // Update the first template (active one)
       const existingTemplate = existingTemplates[0];
-      result = await Template.update(
+      result = await Template.updateFormula(
         existingTemplate.id,
         'Current in Use',
         { formula },
@@ -573,7 +460,7 @@ router.post('/qr-protocol/formula', async (req, res) => {
       );
     } else {
       // Create new template
-      result = await Template.create(
+      result = await Template.createFormula(
         business_id,
         'Current in Use',
         { formula }
@@ -602,12 +489,12 @@ router.post('/qr-protocol/formula', async (req, res) => {
 });
 
 /**
- * GET /api/service/pos/product-codes
+ * GET /api/tea_machine/get_productCode
  * Get all product codes for a business
  * Query: { business_id }
  * Returns: { success, data: [...] }
  */
-router.get('/product-codes', async (req, res) => {
+router.get('/get_productCode', async (req, res) => {
   try {
     const { business_id } = req.query;
 
@@ -620,7 +507,7 @@ router.get('/product-codes', async (req, res) => {
 
     console.log(`[ProductCode] Getting codes for business: ${business_id}`);
 
-    const codes = await ProductCode.getProductCodesByBusinessId(business_id);
+    const codes = await ProductCode.getAllProductCodes(business_id);
 
     res.json({
       success: true,
@@ -638,12 +525,12 @@ router.get('/product-codes', async (req, res) => {
 });
 
 /**
- * POST /api/service/pos/product-codes
+ * POST /api/tea_machine/save_productCode
  * Save or update product code
  * Body: { business_id, product_id, code }
  * Returns: { success, data: {...} }
  */
-router.post('/product-codes', async (req, res) => {
+router.post('/save_productCode', async (req, res) => {
   try {
     const { business_id, product_id, code } = req.body;
 
@@ -674,15 +561,14 @@ router.post('/product-codes', async (req, res) => {
 });
 
 /**
- * DELETE /api/service/pos/product-codes/:product_id
- * Delete product code
- * Query: { business_id }
- * Returns: { success }
+ * GET /api/tea_machine/search_productCode
+ * Get product code for a specific product
+ * Query: { business_id, product_id }
+ * Returns: { success, data: [{product_id, code}] }
  */
-router.delete('/product-codes/:product_id', async (req, res) => {
+router.get('/search_productCode', async (req, res) => {
   try {
-    const { product_id } = req.params;
-    const { business_id } = req.query;
+    const { business_id, product_id } = req.query;
 
     if (!business_id || !product_id) {
       return res.status(400).json({
@@ -691,32 +577,32 @@ router.delete('/product-codes/:product_id', async (req, res) => {
       });
     }
 
-    console.log(`[ProductCode] Deleting code for product: ${product_id}, business: ${business_id}`);
+    console.log(`[ProductCode] Fetching code for product ${product_id} in business ${business_id}`);
 
-    await ProductCode.deleteProductCode(business_id, product_id);
+    const codes = await ProductCode.getProductCodesByProductId(business_id, product_id);
 
     res.json({
       success: true,
-      message: 'Product code deleted successfully'
+      data: codes
     });
   } catch (error) {
-    console.error('[ProductCode] Delete error:', error.message);
+    console.error('[ProductCode] Get product code error:', error.message);
 
     res.status(500).json({
       success: false,
-      message: 'Failed to delete product code',
+      message: 'Failed to get product code',
       error: error.message
     });
   }
 });
 
 /**
- * GET /api/service/pos/product-code-switch
+ * GET /api/tea_machine/getSwitch
  * Get product code switch status for a business
  * Query: { business_id }
  * Returns: { success, data: { business_id, enabled } }
  */
-router.get('/product-code-switch', async (req, res) => {
+router.get('/getSwitch', async (req, res) => {
   try {
     const { business_id } = req.query;
 
@@ -820,12 +706,12 @@ router.get('/sync-qr-data', async (req, res) => {
 });
 
 /**
- * POST /api/service/pos/product-code-switch
+ * POST /api/tea_machine/saveSwitch
  * Update product code switch status
  * Body: { business_id, enabled }
  * Returns: { success, data: { business_id, enabled } }
  */
-router.post('/product-code-switch', async (req, res) => {
+router.post('/saveSwitch', async (req, res) => {
   try {
     const { business_id, enabled } = req.body;
 

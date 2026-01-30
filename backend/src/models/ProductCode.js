@@ -72,6 +72,21 @@ export class ProductCode {
     }
   }
 
+  // Get product codes for a specific product (returns array)
+  static async getProductCodesByProductId(businessId, productId) {
+    try {
+      const codes = await db.manyOrNone(
+        `SELECT * FROM product_codes 
+         WHERE business_id = $1 AND product_id = $2;`,
+        [businessId, productId]
+      );
+      return codes || [];
+    } catch (error) {
+      console.error('Failed to get product code by product ID:', error);
+      throw error;
+    }
+  }
+
   // Save multiple product codes
   static async saveProductCodes(businessId, productCodes) {
     try {

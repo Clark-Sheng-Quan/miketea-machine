@@ -24,8 +24,8 @@ export class Template {
     }
   }
 
-  // Get all templates for a business
-  static async getByBusinessId(businessId) {
+  // Get all formulas for a business
+  static async getAllFormulas(businessId) {
     try {
       const templates = await db.manyOrNone(
         `SELECT * FROM qr_templates 
@@ -56,8 +56,8 @@ export class Template {
     }
   }
 
-  // Create a template
-  static async create(businessId, name, templateJson) {
+  // Create a new formula
+  static async createFormula(businessId, name, templateJson) {
     try {
       const id = `template_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       
@@ -75,8 +75,8 @@ export class Template {
     }
   }
 
-  // Update a template
-  static async update(id, name, templateJson, isActive) {
+  // Update a formula
+  static async updateFormula(id, name, templateJson, isActive) {
     try {
       const template = await db.one(
         `UPDATE qr_templates 

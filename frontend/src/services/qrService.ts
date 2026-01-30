@@ -117,7 +117,7 @@ export const syncQRDataFromAPI = async (): Promise<boolean> => {
     
     // Single unified sync API call
     const response = await fetch(
-      `/api/service/pos/sync-qr-data?business_id=${BUSINESS_ID}`
+      `/api/tea_machine/sync-qr-data?business_id=${BUSINESS_ID}`
     )
     const result = await response.json()
     
