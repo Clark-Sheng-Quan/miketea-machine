@@ -1,15 +1,15 @@
-import React, { useState } from 'react'
-import { Button, Select, Card, message, Collapse, Tag, Spin, Button as CopyButton, Space, Modal } from 'antd'
+import React, { useState, ChangeEvent, CSSProperties } from 'react'
+import { Button, Select, message, Tag, Modal, Card, SelectProps } from 'antd'
 import { UploadOutlined, CopyOutlined, QrcodeOutlined } from '@ant-design/icons'
 import {
   loadQRFormula,
   generateQRStringsFromOrder,
   countValidOptionItems,
-  getValidOptionGroups,
   generateQRCodeDataURL,
   syncQRDataFromAPI,
-  getLastSyncTime
-} from '../services/qrService.ts'
+  getLastSyncTime,
+  QRResult
+} from '../services/qrService'
 
 export default function POS() {
   const [orderData, setOrderData] = useState(null)
@@ -22,17 +22,17 @@ export default function POS() {
   const [generatingQRCodes, setGeneratingQRCodes] = useState(false)
   const [lastSyncTime, setLastSyncTime] = useState(getLastSyncTime())
   const [syncing, setSyncing] = useState(false)
+  const fileInputRef = React.useRef(null)
 
-  // Handle syncing data from API
   const handleSyncData = async () => {
     try {
       setSyncing(true)
       const success = await syncQRDataFromAPI()
       if (success) {
         setLastSyncTime(getLastSyncTime())
-        // Reload formula after sync
         const loadedFormula = await loadQRFormula()
         setFormula(loadedFormula)
+        message.success('Data synced successfully')
       } else {
         message.error('Failed to sync data from API')
       }
@@ -44,7 +44,6 @@ export default function POS() {
     }
   }
 
-  // Handle generating QR codes
   const handleGenerateQRCodes = async () => {
     if (qrStrings.length === 0) {
       message.error('No QR strings to generate')
@@ -53,15 +52,13 @@ export default function POS() {
 
     try {
       setGeneratingQRCodes(true)
-      const qrStringValues = qrStrings.map(item => item.qrString)
+      const qrStringValues = qrStrings.map((item: QRResult) => item.qrString)
       const dataURLs = await Promise.all(
-        qrStringValues.map(qrString => generateQRCodeDataURL(qrString))
+        qrStringValues.map((qrString: string) => generateQRCodeDataURL(qrString))
       )
       
-      const qrCodesData = qrStrings.map((item, idx) => ({
-        key: item.key,
-        productName: item.productName,
-        qrString: item.qrString,
+      const qrCodesData = qrStrings.map((item: QRResult, idx: number) => ({
+        ...item,
         dataURL: dataURLs[idx]
       }))
       
@@ -75,18 +72,15 @@ export default function POS() {
     }
   }
 
-  // Handle order selection - auto-generate QR strings
-  const handleOrderSelect = async (value) => {
+  const handleOrderSelect = async (value: number) => {
     setSelectedOrder(value)
-    setQrStrings([]) // Clear previous results
+    setQrStrings([])
     setLoading(true)
     
     try {
-      // Load formula from database
       const loadedFormula = await loadQRFormula()
       setFormula(loadedFormula)
       
-      // Generate QR strings
       const order = orderData.orders[value]
       const qrList = await generateQRStringsFromOrder(order, loadedFormula)
       setQrStrings(qrList)
@@ -98,22 +92,36 @@ export default function POS() {
     }
   }
 
-  const loadPOSOrders = async () => {
-    try {
-      const response = await fetch('../orderfile/posorder.json')
-      const data = await response.json()
-      const normalizedData = normalizePOSData(data)
-      setOrderData(normalizedData)
-    } catch (error) {
-      message.error(`Failed to load POS Orders: ${error.message}`)
-      console.error(error)
+  const handleFileSelect = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    const reader = new FileReader()
+    reader.onload = async (e) => {
+      try {
+        const content = e.target?.result as string
+        const data = JSON.parse(content)
+        const normalizedData = normalizePOSData(data)
+        setOrderData(normalizedData)
+        message.success(`Orders loaded successfully (${normalizedData.orders.length} orders)`)
+      } catch (error) {
+        message.error(`Failed to parse JSON file: ${error instanceof Error ? error.message : String(error)}`)
+        console.error(error)
+      }
     }
+    reader.onerror = () => {
+      message.error('Failed to read file')
+    }
+    reader.readAsText(file)
   }
 
-  // Normalize POS order data to match online order structure
-  const normalizePOSData = (posData) => {
+  const triggerFileInput = () => {
+    fileInputRef.current?.click()
+  }
+
+  const normalizePOSData = (posData: any) => {
     return {
-      orders: posData.orderitems.map(item => ({
+      orders: posData.orderitems.map((item: any) => ({
         _id: posData.id,
         orderId: posData.id,
         order_num: posData.orderNumber || 'N/A',
@@ -123,7 +131,7 @@ export default function POS() {
             itemId: item.id,
             sku: item.product?.sku || '',
             name: item.product?.name || 'Unknown Product',
-            options: item.product?.options?.map(opt => ({
+            options: item.product?.options?.map((opt: any) => ({
               _id: opt._id,
               name: opt.name,
               option_items: opt.option_items || []
@@ -134,28 +142,17 @@ export default function POS() {
     }
   }
 
-  const columns = [
-    {
-      title: 'Product',
-      dataIndex: 'productName',
-      key: 'productName'
-    },
-    {
-      title: 'Option Codes',
-      dataIndex: 'optionCodes',
-      key: 'optionCodes',
-      render: (text) => <code style={{ fontSize: '12px' }}>{text}</code>
-    },
-    {
-      title: 'QR String',
-      dataIndex: 'qrString',
-      key: 'qrString',
-      render: (text) => <code style={{ fontSize: '12px', color: '#d4380d' }}>{text}</code>
-    }
-  ]
-
   return (
     <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '16px', flex: 1, minHeight: 0 }}>
+      {/* Hidden file input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".json"
+        onChange={handleFileSelect}
+        style={{ display: 'none' }}
+      />
+
       {/* Top Control Panel */}
       <div style={{ display: 'flex', gap: '16px' }}>
         {/* Left: Load and Sync */}
@@ -165,7 +162,7 @@ export default function POS() {
               type="primary"
               block
               icon={<UploadOutlined />}
-              onClick={loadPOSOrders}
+              onClick={triggerFileInput}
             >
               Load Orders
             </Button>
@@ -193,10 +190,10 @@ export default function POS() {
               <Select
                 placeholder="Select an order"
                 onChange={handleOrderSelect}
-                options={orderData.orders.map((order, idx) => ({
+                options={orderData.orders.map((order: any, idx: number) => ({
                   value: idx,
                   label: `Order ${idx + 1} - ${order._id.slice(0, 8)}... (${order.products.length} items)`
-                }))}
+                })) as SelectProps['options']}
               />
               
               {selectedOrder !== null && orderData?.orders[selectedOrder] && (
@@ -206,7 +203,7 @@ export default function POS() {
                   </div>
                   <div>
                     <strong>Products:</strong>
-                    {orderData.orders[selectedOrder].products.map((p, idx) => (
+                    {orderData.orders[selectedOrder].products.map((p: any, idx: number) => (
                       <div key={idx} style={{ marginLeft: '12px', fontSize: '11px', marginTop: '4px' }}>
                         • {p.name} ({countValidOptionItems(p)} options)
                       </div>
@@ -291,6 +288,7 @@ export default function POS() {
                     icon={<CopyOutlined />}
                     onClick={() => {
                       navigator.clipboard.writeText(qrStrings[0]?.qrString)
+                      message.success('Copied!')
                     }}
                   />
                 </div>
@@ -313,13 +311,13 @@ export default function POS() {
           <Button key="close" onClick={() => setQrCodesModalVisible(false)}>
             Close
           </Button>
-        ]}
+        ] as React.ReactNode[]}
         width={1000}
-        style={{ maxHeight: '90vh' }}
-        bodyStyle={{ maxHeight: '70vh', overflow: 'auto' }}
+        style={{ maxHeight: '90vh' } as CSSProperties}
+        bodyStyle={{ maxHeight: '70vh', overflow: 'auto' } as CSSProperties}
       >
         <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '16px' }}>
-          {qrCodes.map((qrCode, idx) => (
+          {qrCodes.map((qrCode: any, idx: number) => (
             <div
               key={qrCode.key}
               style={{

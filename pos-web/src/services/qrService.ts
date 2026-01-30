@@ -46,41 +46,11 @@ interface Order {
   [key: string]: any
 }
 
-export interface QRResult {
+interface QRResult {
   key: string
   productName: string
   optionCodes: string
   qrString: string
-}
-
-interface ProductCodeResponse {
-  success: boolean
-  data?: Array<{
-    product_id: string
-    code: string
-  }>
-}
-
-interface OptionCodeResponse {
-  success: boolean
-  data?: Array<{
-    option_item_id: string
-    code: string
-  }>
-}
-
-interface FormulaResponse {
-  success: boolean
-  data?: {
-    formula: string
-  }
-}
-
-interface SwitchResponse {
-  success: boolean
-  data?: {
-    enabled: boolean
-  }
 }
 
 /**
@@ -189,6 +159,7 @@ export const clearQRDataCache = (): void => {
   })
   console.log('[QR Service] Cache cleared')
 }
+
 export const loadQRFormula = async (): Promise<string> => {
   // Load from local storage only
   const cached = getFromStorage(STORAGE_KEYS.FORMULA)
