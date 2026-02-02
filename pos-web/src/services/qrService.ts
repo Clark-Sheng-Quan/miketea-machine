@@ -6,6 +6,7 @@
 import QRCode from 'qrcode'
 
 const BUSINESS_ID = '67295c445242136caa4511d4'
+const TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjVmN2JiOTE5NmVhMjA3MjJkOWQxMWI5IiwiZW1haWwiOiJsb3VoYW93ZWlAZ21haWwuY29tIiwicGhvbmUiOiIwNDAwMDAwMDAxIiwiZXhwIjoxNzY5MTQ2MzMxfQ.yAb8KemT9h7sjJZAlYg03fntKLkAdSQ65MUsNAotD0I'
 
 // Local storage keys
 const STORAGE_KEYS = {
@@ -87,7 +88,14 @@ export const syncQRDataFromAPI = async (): Promise<boolean> => {
     
     // Single unified sync API call
     const response = await fetch(
-      `/api/tea_machine/sync-qr-data?business_id=${BUSINESS_ID}`
+      `/api/tea_machine/sync-qr-data?business_id=${BUSINESS_ID}`,
+      {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${TOKEN}`,
+          'Content-Type': 'application/json'
+        }
+      }
     )
     const result = await response.json()
     

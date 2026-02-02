@@ -6,7 +6,7 @@ import { POS_BUSINESS_ID } from '../config/constants'
 
 export default function ProductCodeManagement() {
   const [products, setProducts] = useState([])
-  const [productCodes, setProductCodes] = useState({})
+  // const [productCodes, setProductCodes] = useState({})
   const [loading, setLoading] = useState(true)
   const [loadingProducts, setLoadingProducts] = useState(false)
   const [savingCode, setSavingCode] = useState(false)
@@ -58,16 +58,16 @@ export default function ProductCodeManagement() {
   }
 
   // Load switch status (used for toggle)
-  const loadSwitch = async () => {
-    try {
-      const response = await productCodesAPI.getSwitch(POS_BUSINESS_ID)
-      if (response.data.success && response.data.data) {
-        setSwitchEnabled(response.data.data.enabled || false)
-      }
-    } catch (error) {
-      console.error('Error loading switch:', error)
-    }
-  }
+  // const loadSwitch = async () => {
+  //   try {
+  //     const response = await productCodesAPI.getSwitch(POS_BUSINESS_ID)
+  //     if (response.data.success && response.data.data) {
+  //       setSwitchEnabled(response.data.data.enabled || false)
+  //     }
+  //   } catch (error) {
+  //     console.error('Error loading switch:', error)
+  //   }
+  // }
 
   // Handle switch toggle
   const handleSwitchChange = async (checked) => {

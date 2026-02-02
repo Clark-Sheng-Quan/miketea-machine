@@ -23,7 +23,7 @@ export default function POS() {
   const [lastSyncTime, setLastSyncTime] = useState(getLastSyncTime())
   const [syncing, setSyncing] = useState(false)
   const fileInputRef = React.useRef(null)
-
+ 
   const handleSyncData = async () => {
     try {
       setSyncing(true)

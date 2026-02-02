@@ -4,34 +4,8 @@ import { qrProtocolAPI } from '../services/api.js'
 import { POS_BUSINESS_ID } from '../config/constants.js'
 
 export default function QRProtocol() {
-  // 模板列表 - 本地数据
-  const [templates, setTemplates] = useState([
-    {
-      id: 'current_in_use',
-      name: 'Current in Use',
-      formula: 'ORD|#{productCode}|#{optionCodes}'
-    },
-    {
-      id: 'template_1',
-      name: 'ORD|#{productCode}|#{optionCode},#{optionCode}',
-      formula: 'ORD|#{productCode}|#{optionCode},#{optionCode}'
-    },
-    {
-      id: 'template_2',
-      name: '=A01|C02,T04,W02',
-      formula: '=#{productCode}|#{optionCodes}'
-    },
-    {
-      id: 'template_3',
-      name: 'product | Size | Sugar, Ice | Toppings',
-      formula: '#{productCode}|#{Size}|#{SugarLevel},#{IceLevel}|#{Toppings}'
-    }
-  ])
-
-  const [selectedTemplate, setSelectedTemplate] = useState('current_in_use')
-  const [editingFormula, setEditingFormula] = useState('ORD|#{productCode}|#{optionCode},#{optionCode}')
+  const [editingFormula, setEditingFormula] = useState('#{productCode}|#{optionCodes}')
   const [parameters, setParameters] = useState({})
-  const [savedFormula, setSavedFormula] = useState('ORD|#{productCode}|#{optionCode},#{optionCode}')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [saveSuccess, setSaveSuccess] = useState(false)
@@ -96,12 +70,9 @@ export default function QRProtocol() {
     
     return correctedFormula
   }
-
-  // 从公式中提取参数 - 支持 #{identifier} 格式
   const extractParameters = (formula) => {
     const params = {}
-    
-    // 匹配标识符格式的参数：#{identifier}
+
     const paramRegex = /#{([a-zA-Z_][a-zA-Z0-9_]*)}/g
     let match
     
@@ -114,31 +85,6 @@ export default function QRProtocol() {
     
     return params
   }
-
-  const handleTemplateChange = (value) => {
-    setSelectedTemplate(value)
-  }
-
-  const handleLoadTemplate = () => {
-    const template = templates.find(t => t.id === selectedTemplate)
-    if (template) {
-      setEditingFormula(template.formula)
-      setParameters(extractParameters(template.formula))
-    }
-  }
-
-  // const handleTemplateChange = (value) => {
-  //   setSelectedTemplate(value)
-  // }
-
-  // const handleLoadTemplate = () => {
-  //   const template = templates.find(t => t.id === selectedTemplate)
-  //   if (template) {
-  //     setEditingFormula(template.formula)
-  //     setParameters(extractParameters(template.formula))
-  //     message.success(`Loaded template: ${template.name}`)
-  //   }
-  // }
 
   const handleFormulaEdit = (value) => {
     setEditingFormula(value)

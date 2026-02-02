@@ -5,6 +5,7 @@ import { OptionItemCode } from '../models/OptionItemCode.js';
 import { Template } from '../models/Template.js';
 import { ProductCode } from '../models/ProductCode.js';
 import { ProductCodeSwitch } from '../models/ProductCodeSwitch.js';
+import { verifyTokenMiddleware } from '../services/tokenService.js';
 
 dotenv.config();
 
@@ -635,11 +636,13 @@ router.get('/getSwitch', async (req, res) => {
 /**
  * GET /api/service/pos/sync-qr-data
  * Sync all QR-related data from database to frontend
+ * Requires valid POS token for authentication
  * Returns all data needed for QR code generation in one response
+ * Header: Authorization: Bearer <token>
  * Query: { business_id }
  * Returns: { success, data: { formula, switch, productCodes, optionCodes } }
  */
-router.get('/sync-qr-data', async (req, res) => {
+router.get('/sync-qr-data', verifyTokenMiddleware(), async (req, res) => {
   try {
     const { business_id } = req.query;
 
