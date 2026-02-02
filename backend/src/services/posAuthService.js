@@ -4,9 +4,6 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const POS_API_BASE = process.env.POS_API_BASE || 'https://dev.vend88.com';
-const POS_ACCOUNT = process.env.POS_ACCOUNT || '';
-const POS_PASSWORD = process.env.POS_PASSWORD || '';
-
 let posAuthToken = null;
 let tokenExpireTime = null;
 
