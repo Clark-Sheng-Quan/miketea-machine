@@ -378,7 +378,7 @@ router.get('/get_formula', async (req, res) => {
         return res.json({
           success: true,
           data: {
-            formula: 'ORD|#{productCode}|#{optionCode},#{optionCode}',
+            formula: 'ORD|#{productCode}|#{optionCodes}',
             message: 'No saved formula, using default'
           }
         });
