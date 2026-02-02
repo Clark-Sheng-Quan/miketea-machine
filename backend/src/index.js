@@ -110,7 +110,7 @@ app.get('/health', (req, res) => {
 });
 
 // Routes
-app.use('/api/tea_machine', posServiceRoutes);
+app.use('/tea_machine', posServiceRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
