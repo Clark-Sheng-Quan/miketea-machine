@@ -72,6 +72,7 @@ function setupCORS() {
         'https://dev.vend88.com',
         'https://dev.vend88.com/',
         // 'http://localhost:3001',
+        // 'http://192.168.0.99:3001/'
       ];
 
       // In development, allow all origins
