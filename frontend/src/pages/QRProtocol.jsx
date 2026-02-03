@@ -11,7 +11,6 @@ export default function QRProtocol() {
   const [saving, setSaving] = useState(false)
   const [saveSuccess, setSaveSuccess] = useState(false)
 
-  // 页面加载时从数据库获取公式
   useEffect(() => {
     const loadFormula = async () => {
       try {
@@ -48,12 +47,9 @@ export default function QRProtocol() {
     
     return name
   }
-
-  // 自动纠正公式中的参数名大小写 - 只纠正 #{identifier} 格式，不纠正引号格式的选项组名
   const autoCorrectFormula = (formula) => {
     let correctedFormula = formula
     
-    // 只匹配标识符格式的参数：#{identifier}
     const paramRegex = /#{([a-zA-Z_][a-zA-Z0-9_]*)}/g
     let match
     
@@ -97,23 +93,19 @@ export default function QRProtocol() {
       return
     }
     
-    // 自动纠正公式中的参数名
     const correctedFormula = autoCorrectFormula(editingFormula)
     
     try {
       setSaving(true)
       setSaveSuccess(false)
       
-      // 保存到数据库
       const response = await qrProtocolAPI.saveFormula(POS_BUSINESS_ID, correctedFormula)
       
       if (response.data.success) {
-        // 更新编辑框和已保存公式
         setEditingFormula(correctedFormula)
         setSavedFormula(correctedFormula)
         setParameters(extractParameters(correctedFormula))
-        
-        // 显示成功状态
+
         setSaveSuccess(true)
         setTimeout(() => setSaveSuccess(false), 2000)
       }
@@ -136,8 +128,6 @@ export default function QRProtocol() {
     if (!editingFormula.trim()) {
       return
     }
-
-    // 检查是否所有必需参数都填写了
     const formula = editingFormula
     const paramRegex = /#{([^}]+)}/g
     let match
@@ -154,7 +144,6 @@ export default function QRProtocol() {
       return
     }
 
-    // 生成最终值
     let result = formula
     Object.entries(parameters).forEach(([key, value]) => {
       result = result.replace(new RegExp(`#{${key}}`, 'g'), value)

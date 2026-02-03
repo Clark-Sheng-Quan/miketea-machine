@@ -5,7 +5,6 @@ import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-// 重试连接数据库
 async function waitForDatabase(maxRetries = 30) {
   for (let i = 0; i < maxRetries; i++) {
     try {
@@ -24,12 +23,10 @@ async function runMigrations() {
   try {
     console.log('Starting database migrations...');
 
-    // 等待数据库就绪
     await waitForDatabase();
 
-    // Create tables - 与后端模型保持一致
     const migrations = [
-      // option_item_codes 表 - 口味代码管理
+      // option_item_codes
       `
         CREATE TABLE IF NOT EXISTS option_item_codes (
           business_id VARCHAR(255) NOT NULL,
@@ -42,7 +39,7 @@ async function runMigrations() {
         );
         CREATE INDEX IF NOT EXISTS idx_option_id ON option_item_codes(option_id);
       `,
-      // qr_templates 表 - QR模板管理
+      // qr_templates
       `
         CREATE TABLE IF NOT EXISTS qr_templates (
           id VARCHAR(255) PRIMARY KEY,
@@ -55,7 +52,7 @@ async function runMigrations() {
         );
         CREATE INDEX IF NOT EXISTS idx_business_id ON qr_templates(business_id);
       `,
-      // product_codes 表 - 产品代码管理
+      // product_codes
       `
         CREATE TABLE IF NOT EXISTS product_codes (
           business_id VARCHAR(255) NOT NULL,
@@ -67,7 +64,7 @@ async function runMigrations() {
         );
         CREATE INDEX IF NOT EXISTS idx_product_business_id ON product_codes(business_id);
       `,
-      // product_code_settings 表 - 产品代码开关设置
+      // product_code_settings
       `
         CREATE TABLE IF NOT EXISTS product_code_settings (
           business_id VARCHAR(255) PRIMARY KEY,

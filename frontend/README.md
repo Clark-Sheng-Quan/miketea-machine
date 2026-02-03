@@ -10,7 +10,6 @@ React 18 + Vite admin dashboard for managing milk tea machine integration with P
 - **npm** or **yarn**
 - **Backend API running** on http://localhost:3000 (or configured URL)
 - frontend-1  |   ➜  Local:   http://localhost:3001/
-- frontend-1  |   ➜  Network: http://172.18.0.3:3001/
 ---
 
 ## 🚀 Quick Start
