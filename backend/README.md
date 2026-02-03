@@ -14,7 +14,7 @@ Node.js + Express backend API for milk tea machine integration with POS system. 
 
 ## 🚀 Quick Start
 
-### Option 1: Docker Compose (Recommended)
+### Option 1: Docker Compose
 
 ```bash
 # Start from project root
@@ -25,7 +25,38 @@ docker-compose up -d
 docker-compose logs -f backend
 ```
 
-### Option 2: Local Development
+### Option 2: Docker Compose Production
+
+```bash
+# Start from backend directory
+cd backend
+
+# Ensure database credentials are configured in .env.production
+cat .env.production
+
+# Start all services (PostgreSQL, Backend, Nginx)
+docker-compose -f docker-compose.prod.yml up -d
+
+# Verify all services are running
+docker-compose -f docker-compose.prod.yml ps
+
+# View backend logs
+docker-compose -f docker-compose.prod.yml logs -f backend
+
+# To restart after code changes
+docker-compose -f docker-compose.prod.yml restart backend
+
+# To stop all services
+docker-compose -f docker-compose.prod.yml down
+```
+
+**Production Configuration:**
+- Backend port: 3000 (internal), exposed via Nginx
+- Database: AWS RDS or configured in `.env.production`
+- CORS: Only allows `https://www.vend88.com.au`
+- Logging: Files saved to `/var/log/miketea-machine/`
+
+### Option 3: Local Development
 
 #### Step 1: Start PostgreSQL Database
 

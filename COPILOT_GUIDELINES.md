@@ -44,6 +44,32 @@
   - 异常消息
 - **不包括**：代码变量名、函数名等（保持已有命名约定）
 
+### 4. 配置管理规则
+- **禁止规则**：不要在代码文件中硬编码配置的默认值
+- **问题代码**（❌ 错误）：
+  ```javascript
+  const dbConfig = {
+    host: process.env.DB_HOST || 'localhost',      // 硬编码默认值
+    port: process.env.DB_PORT || 5432,             // 硬编码默认值
+    database: process.env.DB_NAME || 'miketea_machine', // 硬编码默认值
+  };
+  ```
+- **正确做法**（✅ 正确）：
+  - 在 `.env` 文件中定义所有值（包括默认值）
+  - 代码中只读取环境变量，不提供备用值
+  - 或使用专门的 `config/` 目录管理所有默认配置
+  ```javascript
+  const dbConfig = {
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
+    database: process.env.DB_NAME,
+  };
+  ```
+- **原因**：
+  - 避免代码和配置文件中配置重复
+  - 配置变更时只需改一个地方
+  - 防止代码中的默认值与实际配置不一致
+
 ---
   - 3 个以上文件
   - 架构重构
