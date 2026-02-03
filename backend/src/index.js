@@ -71,7 +71,7 @@ function setupCORS() {
         'https://www.vend88.com.au/',
         'https://dev.vend88.com',
         'https://dev.vend88.com/',
-        'http://localhost:3001',
+        // 'http://localhost:3001',
         // 'http://192.168.0.99:3001/'
       ];
 
