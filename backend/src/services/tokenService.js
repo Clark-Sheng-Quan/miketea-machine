@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const POS_API_BASE = process.env.POS_API_BASE || 'https://dev.vend88.com';
+const POS_API_BASE = process.env.POS_API_BASE;
 
 /**
  * Verify POS token by calling POS API's /auth/profile endpoint
