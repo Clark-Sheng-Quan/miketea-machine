@@ -11,7 +11,7 @@ export default defineConfig({
       interval: 1000
     },
     proxy: {
-      '/api': {
+      '/tea_machine': {
         target: 'http://localhost:3000',
         changeOrigin: true
       }

@@ -23,7 +23,7 @@ export default function OptionsManagement() {
         return
       }
 
-      const response = await posAuthAPI.getOptions(token, POS_BUSINESS_ID, pageSize, pageIdx)
+      const response = await posAuthAPI.getOptions(POS_BUSINESS_ID, pageSize, pageIdx)
       console.log('[OptionsManagement] Response:', response.data)
       const optionsData = response.data.data?.option || []
       const maxPageNum = response.data.data?.max_page || 0

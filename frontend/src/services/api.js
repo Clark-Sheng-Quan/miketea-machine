@@ -9,16 +9,25 @@ const client = axios.create({
   }
 });
 
+// Add request interceptor to inject token
+client.interceptors.request.use((config) => {
+  const token = localStorage.getItem('posToken');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+}, (error) => {
+  return Promise.reject(error);
+});
+
 // Auth service for POS login and options
 export const posAuthAPI = {
   login: (email, password) => client.post('/tea_machine/login', { email, password }),
-  getOptions: (token, businessId, pageSize, pageIdx) => client.get('/tea_machine/search_options', { 
-    params: { business_id: businessId, page_size: pageSize, page_idx: pageIdx },
-    headers: { 'Authorization': `Bearer ${token}` }
+  getOptions: (businessId, pageSize, pageIdx) => client.get('/tea_machine/search_options', { 
+    params: { business_id: businessId, page_size: pageSize, page_idx: pageIdx }
   }),
-  searchProducts: (token, businessId, pageSize, pageIdx) => client.get('/tea_machine/search_products', { 
-    params: { business_id: businessId, page_size: pageSize, page_idx: pageIdx },
-    headers: { 'Authorization': `Bearer ${token}` }
+  searchProducts: (businessId, pageSize, pageIdx) => client.get('/tea_machine/search_products', { 
+    params: { business_id: businessId, page_size: pageSize, page_idx: pageIdx }
   })
 };
 

@@ -5,6 +5,7 @@ import { POS_BUSINESS_ID } from '../config/constants.js'
 
 export default function QRProtocol() {
   const [editingFormula, setEditingFormula] = useState('#{productCode}|#{optionCodes}')
+  const [savedFormula, setSavedFormula] = useState('')
   const [parameters, setParameters] = useState({})
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -179,7 +180,7 @@ export default function QRProtocol() {
       ) : (
         <>
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', border: '1px solid #e0e0e0', borderRadius: '8px', background: 'white', padding: '20px', overflowY: 'auto' }}>
-        <h3 style={{ margin: '0 0 16px 0', fontSize: '16px', fontWeight: '600' }}>QR Code Formula</h3>
+        <h3 style={{ margin: '0 0 16px 0', fontSize: '16px', fontWeight: '600' }}>QR Format</h3>
 
         {/* Formula Editor */}
         <div style={{ marginBottom: '20px' }}>

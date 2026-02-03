@@ -62,7 +62,7 @@ export default function MilkTeaLayout() {
                       <div style={{ width: '100%', position: 'sticky', top: 0, zIndex: 5, flexShrink: 0 }}>
                         <div className="Styling_NavigationContainer" style={{ minHeight: '50px', display: 'flex', alignItems: 'center', background: 'white', borderBottom: '1px solid rgba(0, 0, 0, 0.05)', boxShadow: 'rgba(0, 0, 0, 0.05) 0px 1px 3px' }}>
                           <div style={{ display: 'flex', minHeight: '60px', gap: 0, paddingRight: '30px' }}>
-                            {['Option Code', 'Product Code', 'QR Protocol'].map((tab, idx) => (
+                            {['Option Code', 'Product Code', 'QR Format'].map((tab, idx) => (
                               <div
                                 key={idx}
                                 className={`Styling_item_Container ${

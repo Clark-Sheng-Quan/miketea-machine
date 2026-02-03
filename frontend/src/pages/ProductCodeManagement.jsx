@@ -98,7 +98,7 @@ export default function ProductCodeManagement() {
       setLoadingProducts(true)
 
       // Search products from POS API with pagination
-      const response = await posAuthAPI.searchProducts(token, POS_BUSINESS_ID, pageSize, pageIdx)
+      const response = await posAuthAPI.searchProducts(POS_BUSINESS_ID, pageSize, pageIdx)
 
       if (response.data.success && response.data.data) {
         const productList = response.data.data?.products || []
