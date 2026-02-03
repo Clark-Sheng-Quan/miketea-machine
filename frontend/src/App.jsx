@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import Login from './pages/Login'
-import MilkTeaLayout from './components/MilkTeaLayout'
+import Layout from './components/Layout'
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
@@ -20,7 +20,7 @@ function App() {
     return <Login onLoginSuccess={handleLoginSuccess} />
   }
 
-  return <MilkTeaLayout />
+  return <Layout />
 }
 
 export default App
