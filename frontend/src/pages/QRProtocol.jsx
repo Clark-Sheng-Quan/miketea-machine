@@ -10,6 +10,31 @@ export default function QRProtocol() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [saveSuccess, setSaveSuccess] = useState(false)
+  const [saveError, setSaveError] = useState('')
+
+  // Define valid parameters for QR formula
+  const VALID_PARAMETERS = [
+    {
+      key: 'productCode',
+      desc: 'Product code - Switch ON: uses configured product code. Switch OFF: uses raw product ID'
+    },
+    {
+      key: 'optionCodes',
+      desc: 'Option codes - Auto-populates all selected options, comma-separated (e.g., S1,B2,T3)'
+    },
+    {
+      key: 'orderId',
+      desc: 'Order ID - Unique order identifier from POS system'
+    },
+    {
+      key: 'itemId',
+      desc: 'Item ID - Sequence number for each item in the order'
+    },
+    {
+      key: 'sku',
+      desc: 'Product SKU - Product SKU code'
+    }
+  ];
 
   useEffect(() => {
     const loadFormula = async () => {
@@ -33,40 +58,11 @@ export default function QRProtocol() {
     loadFormula()
   }, [])
 
-  // 规范化参数名 - 将参数名统一为驼峰命名法（不分大小写匹配）
-  const normalizeParamName = (name) => {
-    const lowerName = name.toLowerCase()
-    
-    if (lowerName === 'productcode') {
-      return 'productCode'
-    } else if (lowerName === 'optioncode' || lowerName === 'optioncodes') {
-      return 'optionCodes'
-    } else if (lowerName === 'timestamp') {
-      return 'timestamp'
-    }
-    
-    return name
-  }
-  const autoCorrectFormula = (formula) => {
-    let correctedFormula = formula
-    
-    const paramRegex = /#{([a-zA-Z_][a-zA-Z0-9_]*)}/g
-    let match
-    
-    while ((match = paramRegex.exec(formula)) !== null) {
-      const originalParam = match[1]
-      const correctedParam = normalizeParamName(originalParam)
-      
-      if (originalParam !== correctedParam) {
-        correctedFormula = correctedFormula.replace(
-          new RegExp(`#{${originalParam}}`, 'g'),
-          `#{${correctedParam}}`
-        )
-      }
-    }
-    
-    return correctedFormula
-  }
+  /**
+   * Extract all parameters from formula
+   * @param {string} formula - QR formula string
+   * @returns {object} - Object with parameter names as keys
+   */
   const extractParameters = (formula) => {
     const params = {}
 
@@ -88,30 +84,42 @@ export default function QRProtocol() {
     setParameters(extractParameters(value))
   }
 
+  /**
+   * Save formula to backend
+   * Backend will handle parameter normalization and validation
+   */
   const handleSaveAndUse = async () => {
     if (!editingFormula.trim()) {
       return
     }
     
-    const correctedFormula = autoCorrectFormula(editingFormula)
-    
     try {
       setSaving(true)
       setSaveSuccess(false)
+      setSaveError('')
       
-      const response = await qrProtocolAPI.saveFormula(POS_BUSINESS_ID, correctedFormula)
+      const response = await qrProtocolAPI.saveFormula(POS_BUSINESS_ID, editingFormula)
       
       if (response.data.success) {
-        setEditingFormula(correctedFormula)
-        setSavedFormula(correctedFormula)
-        setParameters(extractParameters(correctedFormula))
+        const normalizedFormula = response.data.data.formula
+        setEditingFormula(normalizedFormula)
+        setSavedFormula(normalizedFormula)
+        setParameters(extractParameters(normalizedFormula))
 
         setSaveSuccess(true)
         setTimeout(() => setSaveSuccess(false), 2000)
+      } else {
+        // Handle error response from backend
+        setSaveError(response.data.message || 'Failed to save formula')
+        setTimeout(() => setSaveError(''), 3000)
       }
     } catch (error) {
       console.error('Failed to save formula:', error)
-
+      
+      // Handle network or other errors
+      const errorMessage = error.response?.data?.message || error.message || 'Network error'
+      setSaveError(errorMessage)
+      setTimeout(() => setSaveError(''), 3000)
     } finally {
       setSaving(false)
     }
@@ -191,19 +199,20 @@ export default function QRProtocol() {
 
         {/* Save and Use Button */}
         <Button
-          type={saveSuccess ? 'primary' : 'primary'}
+          type={saveSuccess ? 'primary' : saveError ? 'primary' : 'primary'}
           onClick={handleSaveAndUse}
           loading={saving}
           disabled={saving}
           style={{ 
             marginBottom: '20px',
-            backgroundColor: saveSuccess ? '#52c41a' : undefined,
-            borderColor: saveSuccess ? '#52c41a' : undefined,
-            transition: 'all 0.3s ease'
+            backgroundColor: saveSuccess ? '#52c41a' : saveError ? '#ff4d4f' : undefined,
+            borderColor: saveSuccess ? '#52c41a' : saveError ? '#ff4d4f' : undefined,
+            transition: 'all 0.3s ease',
+            maxWidth: '100%'
           }}
           size="large"
         >
-          {saving ? 'Saving...' : saveSuccess ? '✓ Saved!' : 'Save and Use Formula'}
+          {saving ? 'Saving...' : saveSuccess ? 'Saved!' : saveError ? `${saveError}` : 'Save and Use Formula'}
         </Button>
 
         {/* Available Parameters */}
@@ -212,13 +221,7 @@ export default function QRProtocol() {
             Available Parameters
           </label>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            {[
-              { key: 'productCode', desc: 'Switch ON: uses configured product code. Switch OFF: uses raw product ID' },
-              { key: 'optionCodes', desc: 'Auto-populates all selected options, comma-separated (e.g., S1,B2,T3)' },
-              { key: 'orderId', desc: 'Unique order identifier from POS system' },
-              { key: 'itemId', desc: 'Sequence number for each item in the order' },
-              { key: 'sku', desc: 'Product SKU code' }
-            ].map((param) => (
+            {VALID_PARAMETERS.map((param) => (
               <div key={param.key} style={{
                 padding: '8px',
                 background: '#f5f5f5',

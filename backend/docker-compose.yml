@@ -27,7 +27,7 @@ services:
     container_name: miketea-backend-prod
     env_file: .env
     environment:
-      NODE_ENV: production
+      NODE_ENV: development
       DB_HOST: postgres
     ports:
       - "3000:3000"

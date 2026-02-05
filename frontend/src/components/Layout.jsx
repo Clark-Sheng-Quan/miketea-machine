@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import './MilkTeaLayout.css'
+import './Layout.css'
 import OptionsManagement from '../pages/OptionsManagement'
 import QRProtocol from '../pages/QRProtocol'
 import ProductCodeManagement from '../pages/ProductCodeManagement'

@@ -6,6 +6,7 @@ import { Template } from '../models/Template.js';
 import { ProductCode } from '../models/ProductCode.js';
 import { ProductCodeSwitch } from '../models/ProductCodeSwitch.js';
 import { verifyTokenMiddleware } from '../services/tokenService.js';
+import { normalizeFormulaParameters, validateFormulaParameters } from '../utils/naming.js';
 
 dotenv.config();
 
@@ -443,8 +444,19 @@ router.post('/save_formula', verifyTokenMiddleware(), async (req, res) => {
       });
     }
 
-    console.log('[QRProtocol] Saving formula for business:', business_id);
-    console.log('[QRProtocol] Formula:', formula);
+    // 规范化参数名为驼峰格式
+    const normalizedFormula = normalizeFormulaParameters(formula);
+    
+    // 验证参数是否有效
+    const validation = validateFormulaParameters(normalizedFormula);
+    if (!validation.isValid) {
+      return res.status(400).json({
+        success: false,
+        message: `Invalid parameters: ${validation.invalidParams.join(', ')}`
+      });
+    }
+
+
 
     // Check if there's an existing template
     const existingTemplates = await Template.getAllFormulas(business_id);
@@ -456,7 +468,7 @@ router.post('/save_formula', verifyTokenMiddleware(), async (req, res) => {
       result = await Template.updateFormula(
         existingTemplate.id,
         'Current in Use',
-        { formula },
+        { formula: normalizedFormula },
         true
       );
     } else {
@@ -464,7 +476,7 @@ router.post('/save_formula', verifyTokenMiddleware(), async (req, res) => {
       result = await Template.createFormula(
         business_id,
         'Current in Use',
-        { formula }
+        { formula: normalizedFormula }
       );
     }
 
@@ -475,7 +487,7 @@ router.post('/save_formula', verifyTokenMiddleware(), async (req, res) => {
       message: 'Formula saved successfully',
       data: {
         templateId: result.id,
-        formula
+        formula: normalizedFormula
       }
     });
   } catch (error) {
