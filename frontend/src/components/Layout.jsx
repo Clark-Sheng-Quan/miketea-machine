@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
 import './Layout.css'
-import OptionsManagement from '../pages/OptionsManagement'
+import OptionsManagement from '../pages/OptionsCode'
 import QRProtocol from '../pages/QRProtocol'
-import ProductCodeManagement from '../pages/ProductCodeManagement'
+import ProductCodeManagement from '../pages/ProductCode'
 // import POS from '../pages/POS'
 
 export default function MilkTeaLayout() {
