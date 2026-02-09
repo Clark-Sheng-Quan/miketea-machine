@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react'
 import { Spin, message, Button } from 'antd'
 import { ReloadOutlined, SaveOutlined } from '@ant-design/icons'
 import { posAuthAPI, itemCodesAPI } from '../services/api'
-import { POS_BUSINESS_ID } from '../config/constants'
 
 export default function OptionsManagement() {
+  const businessId = localStorage.getItem('POS_BUSINESS_ID') || localStorage.getItem('selectedBusinessId')
   const [options, setOptions] = useState([])
   const [loading, setLoading] = useState(false)
   const [expandedOptionId, setExpandedOptionId] = useState(null)
@@ -17,13 +17,7 @@ export default function OptionsManagement() {
   const loadOptions = async (pageIdx = 0) => {
     try {
       setLoading(true)
-      const token = localStorage.getItem('posToken')
-      if (!token) {
-        message.error('Token not found. Please login again.')
-        return
-      }
-
-      const response = await posAuthAPI.getOptions(POS_BUSINESS_ID, pageSize, pageIdx)
+      const response = await posAuthAPI.getOptions(businessId, pageSize, pageIdx)
       console.log('[OptionsManagement] Response:', response.data)
       const optionsData = response.data.data?.option || []
       const maxPageNum = response.data.data?.max_page || 0
@@ -48,7 +42,7 @@ export default function OptionsManagement() {
   const loadCodesForOption = async (optionId) => {
     try {
       setLoadingCodes(true)
-      const response = await itemCodesAPI.getByOption(POS_BUSINESS_ID, optionId)
+      const response = await itemCodesAPI.getByOption(businessId, optionId)
       
       if (response.data.success && response.data.data) {
         // Convert array to object: { itemId: code }
@@ -96,7 +90,7 @@ export default function OptionsManagement() {
         return;
       }
 
-      const response = await itemCodesAPI.save(POS_BUSINESS_ID, validCodes);
+      const response = await itemCodesAPI.save(businessId, validCodes);
       
     } catch (error) {
       message.error(error.response?.data?.message || 'Failed to save item codes');
@@ -107,7 +101,7 @@ export default function OptionsManagement() {
   const currentOption = expandedOptionId ? options.find(opt => opt._id === expandedOptionId) : null
 
   return (
-    <div style={{ display: 'flex', gap: '20px', flex: 1, minHeight: 0 }}>
+    <div style={{ display: 'flex', gap: '20px', flex: 1, minHeight: 0, padding: '30px' }}>
       {/* Left: Options List */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
         <div style={{ marginBottom: '16px', fontSize: '14px', fontWeight: '600', color: '#333' }}>

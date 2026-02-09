@@ -1,26 +1,35 @@
-import { useState, useEffect } from 'react'
-import Login from './pages/Login'
-import Layout from './components/Layout'
+import { useEffect } from 'react'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import OptionsManagement from './pages/OptionsCode'
+import ProductCodeManagement from './pages/ProductCode'
+import QRProtocol from './pages/QRProtocol'
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
-
   useEffect(() => {
-    const savedToken = localStorage.getItem('posToken')
-    if (savedToken) {
-      setIsLoggedIn(true)
+    // Get token and business_id from URL query parameters
+    const params = new URLSearchParams(window.location.search)
+    const tokenParam = params.get('token')
+    const businessIdParam = params.get('business_id')
+    
+    // Store in localStorage if provided in URL
+    if (tokenParam) {
+      localStorage.setItem('posToken', tokenParam)
+    }
+    if (businessIdParam) {
+      localStorage.setItem('selectedBusinessId', businessIdParam)
+      localStorage.setItem('POS_BUSINESS_ID', businessIdParam)
     }
   }, [])
 
-  const handleLoginSuccess = () => {
-    setIsLoggedIn(true)
-  }
-
-  if (!isLoggedIn) {
-    return <Login onLoginSuccess={handleLoginSuccess} />
-  }
-
-  return <Layout />
+  return (
+    <BrowserRouter basename="/tea-machine">
+      <Routes>
+        <Route path="/options" element={<OptionsManagement />} />
+        <Route path="/products" element={<ProductCodeManagement />} />
+        <Route path="/qr" element={<QRProtocol />} />
+      </Routes>
+    </BrowserRouter>
+  )
 }
 
 export default App

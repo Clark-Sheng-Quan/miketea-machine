@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react'
 import { Input, Button, Spin, message, Switch } from 'antd'
 import { ReloadOutlined, SaveOutlined } from '@ant-design/icons'
 import { posAuthAPI, productCodesAPI } from '../services/api'
-import { POS_BUSINESS_ID } from '../config/constants'
 
 export default function ProductCodeManagement() {
+  const businessId = localStorage.getItem('POS_BUSINESS_ID') || localStorage.getItem('selectedBusinessId')
   const [products, setProducts] = useState([])
   // const [productCodes, setProductCodes] = useState({})
   const [loading, setLoading] = useState(true)
@@ -12,34 +12,21 @@ export default function ProductCodeManagement() {
   const [savingCode, setSavingCode] = useState(false)
   const [currentProduct, setCurrentProduct] = useState(null)
   const [currentCode, setCurrentCode] = useState('')
-  const [token, setToken] = useState('')
   const [currentPage, setCurrentPage] = useState(0)
   const [maxPage, setMaxPage] = useState(0)
   const [pageSize] = useState(20)
   const [switchEnabled, setSwitchEnabled] = useState(false)
   const [loadingSwitch, setLoadingSwitch] = useState(false)
 
-  // Get token from localStorage on mount
-  useEffect(() => {
-    const savedToken = localStorage.getItem('posToken')
-    if (savedToken) {
-      setToken(savedToken)
-    } else {
-      message.error('No authentication token found. Please login again.')
-    }
-  }, [])
-
   // Load products and codes on mount
   useEffect(() => {
-    if (token) {
-      loadSwitchAndProducts()
-    }
-  }, [token])
+    loadSwitchAndProducts()
+  }, [])
 
   // Load switch status first, then load products if enabled
   const loadSwitchAndProducts = async () => {
     try {
-      const response = await productCodesAPI.getSwitch(POS_BUSINESS_ID)
+      const response = await productCodesAPI.getSwitch(businessId)
       if (response.data.success && response.data.data) {
         const isEnabled = response.data.data.enabled || false
         setSwitchEnabled(isEnabled)
@@ -73,7 +60,7 @@ export default function ProductCodeManagement() {
   const handleSwitchChange = async (checked) => {
     try {
       setLoadingSwitch(true)
-      const response = await productCodesAPI.setSwitch(POS_BUSINESS_ID, checked)
+      const response = await productCodesAPI.setSwitch(businessId, checked)
       if (response.data.success) {
         setSwitchEnabled(checked)
         
@@ -98,7 +85,7 @@ export default function ProductCodeManagement() {
       setLoadingProducts(true)
 
       // Search products from POS API with pagination
-      const response = await posAuthAPI.searchProducts(POS_BUSINESS_ID, pageSize, pageIdx)
+      const response = await posAuthAPI.searchProducts(businessId, pageSize, pageIdx)
 
       if (response.data.success && response.data.data) {
         const productList = response.data.data?.products || []
@@ -130,7 +117,7 @@ export default function ProductCodeManagement() {
     
     // Load the code for this specific product
     try {
-      const response = await productCodesAPI.searchByProduct(POS_BUSINESS_ID, product.product_id)
+      const response = await productCodesAPI.searchByProduct(businessId, product.product_id)
       if (response.data.success && response.data.data && response.data.data.length > 0) {
         setCurrentCode(response.data.data[0].code || '')
       } else {
@@ -153,7 +140,7 @@ export default function ProductCodeManagement() {
 
     try {
       setSavingCode(true)
-      const response = await productCodesAPI.save(POS_BUSINESS_ID, currentProduct.product_id, currentCode)
+      const response = await productCodesAPI.save(businessId, currentProduct.product_id, currentCode)
 
       if (response.data.success) {
         setProductCodes(prev => ({
@@ -180,7 +167,7 @@ export default function ProductCodeManagement() {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', flex: 1, minHeight: 0, height: '100%' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', flex: 1, minHeight: 0, height: '100%', padding: '30px' }}>
       {/* Top: Switch Section */}
       <div style={{ padding: '16px', border: '1px solid #e0e0e0', borderRadius: '8px', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>

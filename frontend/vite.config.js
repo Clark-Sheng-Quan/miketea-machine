@@ -15,6 +15,13 @@ export default defineConfig({
         target: 'http://localhost:3000',
         changeOrigin: true
       }
-    }
+    },
+    // Support SPA routing - redirect all non-file routes to index.html
+    middlewareMode: false
+  },
+  build: {
+    // Ensure index.html is the fallback for all routes
+    outDir: 'dist',
+    emptyOutDir: true
   }
 })

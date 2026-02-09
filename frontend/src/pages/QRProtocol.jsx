@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { Select, Input, Button, Spin } from 'antd'
 import { qrProtocolAPI } from '../services/api.js'
-import { POS_BUSINESS_ID } from '../config/constants.js'
 
 export default function QRProtocol() {
+  const businessId = localStorage.getItem('POS_BUSINESS_ID') || localStorage.getItem('selectedBusinessId')
   const [editingFormula, setEditingFormula] = useState('#{productCode}|#{optionCodes}')
   const [savedFormula, setSavedFormula] = useState('')
   const [parameters, setParameters] = useState({})
@@ -40,7 +40,7 @@ export default function QRProtocol() {
     const loadFormula = async () => {
       try {
         setLoading(true)
-        const response = await qrProtocolAPI.getFormula(POS_BUSINESS_ID)
+        const response = await qrProtocolAPI.getFormula(businessId)
         if (response.data.success) {
           const formula = response.data.data.formula
           setEditingFormula(formula)
@@ -98,7 +98,7 @@ export default function QRProtocol() {
       setSaveSuccess(false)
       setSaveError('')
       
-      const response = await qrProtocolAPI.saveFormula(POS_BUSINESS_ID, editingFormula)
+      const response = await qrProtocolAPI.saveFormula(businessId, editingFormula)
       
       if (response.data.success) {
         const normalizedFormula = response.data.data.formula
@@ -169,7 +169,7 @@ export default function QRProtocol() {
   }
 
   return (
-    <div style={{ display: 'flex', gap: '20px', height: '100%' }}>
+    <div style={{ display: 'flex', gap: '20px', height: '100%', padding: '30px' }}>
       {loading ? (
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%' }}>
           <Spin tip="Loading formula..." />
