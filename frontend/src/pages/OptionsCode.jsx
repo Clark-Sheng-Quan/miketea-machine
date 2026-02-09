@@ -5,6 +5,7 @@ import { posAuthAPI, itemCodesAPI } from '../services/api'
 
 export default function OptionsManagement() {
   const businessId = localStorage.getItem('POS_BUSINESS_ID') || localStorage.getItem('selectedBusinessId')
+  const [token, setToken] = useState('')
   const [options, setOptions] = useState([])
   const [loading, setLoading] = useState(false)
   const [expandedOptionId, setExpandedOptionId] = useState(null)
@@ -14,10 +15,19 @@ export default function OptionsManagement() {
   const [maxPage, setMaxPage] = useState(0)
   const [pageSize] = useState(50)
 
+  // Get token from URL params on mount
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const urlToken = params.get('token')
+    if (urlToken) {
+      setToken(urlToken)
+    }
+  }, [])
+
   const loadOptions = async (pageIdx = 0) => {
     try {
       setLoading(true)
-      const response = await posAuthAPI.getOptions(businessId, pageSize, pageIdx)
+      const response = await posAuthAPI.getOptions(businessId, token, pageSize, pageIdx)
       console.log('[OptionsManagement] Response:', response.data)
       const optionsData = response.data.data?.option || []
       const maxPageNum = response.data.data?.max_page || 0
@@ -35,8 +45,10 @@ export default function OptionsManagement() {
   }
 
   useEffect(() => {
-    loadOptions()
-  }, [])
+    if (token) {
+      loadOptions()
+    }
+  }, [token])
 
   // Load codes when option is expanded
   const loadCodesForOption = async (optionId) => {

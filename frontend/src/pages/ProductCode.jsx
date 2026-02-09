@@ -5,6 +5,7 @@ import { posAuthAPI, productCodesAPI } from '../services/api'
 
 export default function ProductCodeManagement() {
   const businessId = localStorage.getItem('POS_BUSINESS_ID') || localStorage.getItem('selectedBusinessId')
+  const [token, setToken] = useState('')
   const [products, setProducts] = useState([])
   // const [productCodes, setProductCodes] = useState({})
   const [loading, setLoading] = useState(true)
@@ -18,10 +19,21 @@ export default function ProductCodeManagement() {
   const [switchEnabled, setSwitchEnabled] = useState(false)
   const [loadingSwitch, setLoadingSwitch] = useState(false)
 
+  // Get token from URL params on mount
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const urlToken = params.get('token')
+    if (urlToken) {
+      setToken(urlToken)
+    }
+  }, [])
+
   // Load products and codes on mount
   useEffect(() => {
-    loadSwitchAndProducts()
-  }, [])
+    if (token) {
+      loadSwitchAndProducts()
+    }
+  }, [token])
 
   // Load switch status first, then load products if enabled
   const loadSwitchAndProducts = async () => {
@@ -85,7 +97,7 @@ export default function ProductCodeManagement() {
       setLoadingProducts(true)
 
       // Search products from POS API with pagination
-      const response = await posAuthAPI.searchProducts(businessId, pageSize, pageIdx)
+      const response = await posAuthAPI.searchProducts(businessId, token, pageSize, pageIdx)
 
       if (response.data.success && response.data.data) {
         const productList = response.data.data?.products || []

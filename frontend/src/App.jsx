@@ -6,15 +6,11 @@ import QRProtocol from './pages/QRProtocol'
 
 function App() {
   useEffect(() => {
-    // Get token and business_id from URL query parameters
+    // Get business_id from URL query parameters
     const params = new URLSearchParams(window.location.search)
-    const tokenParam = params.get('token')
     const businessIdParam = params.get('business_id')
     
-    // Store in localStorage if provided in URL
-    if (tokenParam) {
-      localStorage.setItem('posToken', tokenParam)
-    }
+    // Store business_id in localStorage if provided in URL
     if (businessIdParam) {
       localStorage.setItem('selectedBusinessId', businessIdParam)
       localStorage.setItem('POS_BUSINESS_ID', businessIdParam)

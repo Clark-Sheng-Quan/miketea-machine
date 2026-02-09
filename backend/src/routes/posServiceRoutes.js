@@ -5,8 +5,8 @@ import { OptionItemCode } from '../models/OptionItemCode.js';
 import { Template } from '../models/Template.js';
 import { ProductCode } from '../models/ProductCode.js';
 import { ProductCodeSwitch } from '../models/ProductCodeSwitch.js';
-import { verifyTokenMiddleware } from '../services/tokenService.js';
 import { normalizeFormulaParameters, validateFormulaParameters } from '../utils/naming.js';
+import { verifyTokenMiddleware } from '../services/tokenService.js';
 
 dotenv.config();
 
@@ -19,23 +19,12 @@ const POS_API_BASE = process.env.POS_API_BASE;
  * Get all options (flavors) from POS system with pagination
  * Query: { token, business_id, page_size, page_idx }
  */
-router.get('/search_options', verifyTokenMiddleware(), async (req, res) => {
+router.get('/search_options', async (req, res) => {
   try {
-    // Get token from Authorization header
-    const authHeader = req.headers.authorization;
-    const token = authHeader ? authHeader.replace('Bearer ', '') : null;
-    
-    // Get other params from query
-    const { business_id, page_size = '50', page_idx = '0' } = req.query;
+    // Get token from query params (frontend passes in URL)
+    const { token, business_id, page_size = '50', page_idx = '0' } = req.query;
     const pageSize = parseInt(page_size);
     const pageIdx = parseInt(page_idx);
-
-    if (!token) {
-      return res.status(401).json({
-        success: false,
-        message: 'Token is required in Authorization header'
-      });
-    }
 
     if (!business_id) {
       return res.status(400).json({
@@ -46,12 +35,18 @@ router.get('/search_options', verifyTokenMiddleware(), async (req, res) => {
 
     console.log('[PosService] Fetching options for business:', business_id, 'page_idx:', pageIdx, 'page_size:', pageSize);
 
+    const headers = {
+      'Content-Type': 'application/json'
+    };
+    
+    // Add token to POS API request if provided
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
     const client = axios.create({
       baseURL: POS_API_BASE,
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
+      headers: headers,
       timeout: 10000
     });
 
@@ -94,36 +89,41 @@ router.get('/search_options', verifyTokenMiddleware(), async (req, res) => {
   } catch (error) {
     console.error('[PosService] Fetch options error:', error.message);
 
+    // Check if it's a business_id not found error
+    if (error.response?.status === 404 || error.response?.data?.message?.includes('not found')) {
+      return res.status(400).json({
+        success: false,
+        message: `Business ID not found in POS system: ${error.response?.data?.message || 'Invalid business ID'}`
+      });
+    }
+
+    // Check if it's an authentication error
+    if (error.response?.status === 401) {
+      return res.status(401).json({
+        success: false,
+        message: 'POS API authentication failed - Invalid token'
+      });
+    }
+
     res.status(error.response?.status || 500).json({
       success: false,
-      message: error.response?.data?.message || 'Failed to fetch options',
+      message: error.response?.data?.message || 'Failed to fetch options from POS system',
       error: error.message
     });
   }
-});
+});;
 
 /**
  * GET /api/service/pos/search-products
  * Search products from POS system
  * Query: { token, business_id, page_size, page_idx }
  */
-router.get('/search_products', verifyTokenMiddleware(), async (req, res) => {
+router.get('/search_products', async (req, res) => {
   try {
-    // Get token from Authorization header
-    const authHeader = req.headers.authorization;
-    const token = authHeader ? authHeader.replace('Bearer ', '') : null;
-    
-    // Get other params from query
-    const { business_id, page_size = '20', page_idx = '0' } = req.query;
+    // Get token from query params (frontend passes in URL)
+    const { token, business_id, page_size = '20', page_idx = '0' } = req.query;
     const pageSize = parseInt(page_size);
     const pageIdx = parseInt(page_idx);
-
-    if (!token) {
-      return res.status(401).json({
-        success: false,
-        message: 'Token is required in Authorization header'
-      });
-    }
 
     if (!business_id) {
       return res.status(400).json({
@@ -134,12 +134,18 @@ router.get('/search_products', verifyTokenMiddleware(), async (req, res) => {
 
     console.log('[PosService] Searching products for business:', business_id, 'page_idx:', pageIdx, 'page_size:', pageSize);
 
+    const headers = {
+      'Content-Type': 'application/json'
+    };
+    
+    // Add token to POS API request if provided
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
     const client = axios.create({
       baseURL: POS_API_BASE,
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
+      headers: headers,
       timeout: 10000
     });
 
@@ -152,6 +158,18 @@ router.get('/search_products', verifyTokenMiddleware(), async (req, res) => {
       page_idx: pageIdx,
       detail: true
     });
+
+    // Check if response has data
+    if (!response.data || !response.data.data || !response.data.data.products) {
+      return res.json({
+        success: true,
+        data: {
+          products: [],
+          max_page: 0,
+          total: 0
+        }
+      });
+    }
 
     console.log('[PosService] Products searched successfully');
 
@@ -174,9 +192,25 @@ router.get('/search_products', verifyTokenMiddleware(), async (req, res) => {
   } catch (error) {
     console.error('[PosService] Search products error:', error.message);
 
+    // Check if it's a business_id not found error
+    if (error.response?.status === 404 || error.response?.data?.message?.includes('not found')) {
+      return res.status(400).json({
+        success: false,
+        message: `Business ID not found in POS system: ${error.response?.data?.message || 'Invalid business ID'}`
+      });
+    }
+
+    // Check if it's an authentication error
+    if (error.response?.status === 401) {
+      return res.status(401).json({
+        success: false,
+        message: 'POS API authentication failed - Invalid token'
+      });
+    }
+
     res.status(error.response?.status || 500).json({
       success: false,
-      message: error.response?.data?.message || 'Failed to search products',
+      message: error.response?.data?.message || 'Failed to search products from POS system',
       error: error.message
     });
   }
@@ -188,7 +222,7 @@ router.get('/search_products', verifyTokenMiddleware(), async (req, res) => {
  * Save option item codes to database
  * Body: { business_id, item_codes: [{ optionId, optionItemId, code }, ...] }
  */
-router.post('/save_optionCode', verifyTokenMiddleware(), async (req, res) => {
+router.post('/save_optionCode', async (req, res) => {
   try {
     const { business_id, item_codes } = req.body;
 
@@ -234,7 +268,7 @@ router.post('/save_optionCode', verifyTokenMiddleware(), async (req, res) => {
  * Get all item codes for a business
  * Query: { business_id }
  */
-router.get('/get_optionCode', verifyTokenMiddleware(), async (req, res) => {
+router.get('/get_optionCode', async (req, res) => {
   try {
     const { business_id } = req.query;
 
@@ -269,7 +303,7 @@ router.get('/get_optionCode', verifyTokenMiddleware(), async (req, res) => {
  * Get item codes for a specific option
  * Query: { business_id, option_id }
  */
-router.get('/search_optionCode', verifyTokenMiddleware(), async (req, res) => {
+router.get('/search_optionCode', async (req, res) => {
   try {
     const { business_id, option_id } = req.query;
 
@@ -304,7 +338,7 @@ router.get('/search_optionCode', verifyTokenMiddleware(), async (req, res) => {
  * Get current QR protocol formula for business
  * Query: { business_id }
  */
-router.get('/get_formula', verifyTokenMiddleware(), async (req, res) => {
+router.get('/get_formula', async (req, res) => {
   try {
     const { business_id } = req.query;
 
@@ -374,7 +408,7 @@ router.get('/get_formula', verifyTokenMiddleware(), async (req, res) => {
  * Save QR protocol formula for business
  * Body: { business_id, formula }
  */
-router.post('/save_formula', verifyTokenMiddleware(), async (req, res) => {
+router.post('/save_formula', async (req, res) => {
   try {
     const { business_id, formula } = req.body;
 
@@ -455,7 +489,7 @@ router.post('/save_formula', verifyTokenMiddleware(), async (req, res) => {
  * Query: { business_id }
  * Returns: { success, data: [...] }
  */
-router.get('/get_productCode', verifyTokenMiddleware(), async (req, res) => {
+router.get('/get_productCode', async (req, res) => {
   try {
     const { business_id } = req.query;
 
@@ -491,7 +525,7 @@ router.get('/get_productCode', verifyTokenMiddleware(), async (req, res) => {
  * Body: { business_id, product_id, code }
  * Returns: { success, data: {...} }
  */
-router.post('/save_productCode', verifyTokenMiddleware(), async (req, res) => {
+router.post('/save_productCode', async (req, res) => {
   try {
     const { business_id, product_id, code } = req.body;
 
@@ -527,7 +561,7 @@ router.post('/save_productCode', verifyTokenMiddleware(), async (req, res) => {
  * Query: { business_id, product_id }
  * Returns: { success, data: [{product_id, code}] }
  */
-router.get('/search_productCode', verifyTokenMiddleware(), async (req, res) => {
+router.get('/search_productCode', async (req, res) => {
   try {
     const { business_id, product_id } = req.query;
 
@@ -563,7 +597,7 @@ router.get('/search_productCode', verifyTokenMiddleware(), async (req, res) => {
  * Query: { business_id }
  * Returns: { success, data: { business_id, enabled } }
  */
-router.get('/getSwitch', verifyTokenMiddleware(), async (req, res) => {
+router.get('/getSwitch', async (req, res) => {
   try {
     const { business_id } = req.query;
 
@@ -674,7 +708,7 @@ router.get('/sync-qr-data', verifyTokenMiddleware(), async (req, res) => {
  * Body: { business_id, enabled }
  * Returns: { success, data: { business_id, enabled } }
  */
-router.post('/saveSwitch', verifyTokenMiddleware(), async (req, res) => {
+router.post('/saveSwitch', async (req, res) => {
   try {
     const { business_id, enabled } = req.body;
 
