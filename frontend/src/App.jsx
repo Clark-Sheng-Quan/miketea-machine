@@ -22,7 +22,7 @@ function App() {
   }, [])
 
   return (
-    <BrowserRouter basename="/tea-machine">
+    <BrowserRouter basename="">
       <Routes>
         <Route path="/options" element={<OptionsManagement />} />
         <Route path="/products" element={<ProductCodeManagement />} />
