@@ -1,24 +1,4 @@
 services:
-  # PostgreSQL Database
-  postgres:
-    image: postgres:15-alpine
-    container_name: miketea-postgres-prod
-    environment:
-      POSTGRES_DB: ${DB_NAME}
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-    volumes:
-      - postgres_data_prod:/var/lib/postgresql/data
-      - ./backups:/backups
-    networks:
-      - miketea-network
-    restart: always
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   # Node.js Backend
   backend:
     build:
@@ -31,9 +11,6 @@ services:
     volumes:
       - ./src:/app/src
       - /var/log/miketea-machine:/var/log/miketea-machine
-    depends_on:
-      postgres:
-        condition: service_healthy
     networks:
       - miketea-network
     restart: always
@@ -59,10 +36,6 @@ services:
     networks:
       - miketea-network
     restart: always
-
-volumes:
-  postgres_data_prod:
-    driver: local
 
 networks:
   miketea-network:

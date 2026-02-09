@@ -12,7 +12,7 @@ export default defineConfig({
     },
     proxy: {
       '/tea_machine': {
-        target: 'http://localhost:3000',
+        target: 'http://54.90.180.79:3000',
         changeOrigin: true
       }
     },
