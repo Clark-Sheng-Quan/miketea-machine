@@ -15,58 +15,6 @@ const POS_API_BASE = process.env.POS_API_BASE;
 
 
 /**
- * POST /api/service/pos/login
- * Frontend login proxy - forwards to real POS API
- * Body: { email, password }
- * Returns: { token, ... }
- */
-router.post('/login', async (req, res) => {
-  try {
-    const { email, password } = req.body;
-
-    if (!email || !password) {
-      return res.status(400).json({
-        success: false,
-        message: 'Email and password are required'
-      });
-    }
-
-    console.log('[PosService] Login request from frontend');
-
-    // Forward to real POS API
-    const response = await axios.post(
-      `${POS_API_BASE}/admin/terminal_login`,
-      {
-        email,
-        password
-      },
-      {
-        timeout: 10000,
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      }
-    );
-
-    console.log('[PosService] Login successful, token sent to frontend');
-
-    // Return response to frontend
-    res.json({
-      success: true,
-      data: response.data
-    });
-  } catch (error) {
-    console.error('[PosService] Login error:', error.response?.data || error.message);
-
-    res.status(error.response?.status || 500).json({
-      success: false,
-      message: error.response?.data?.message || 'Login failed',
-      error: error.message
-    });
-  }
-});
-
-/**
  * GET /api/service/pos/options
  * Get all options (flavors) from POS system with pagination
  * Query: { token, business_id, page_size, page_idx }
