@@ -9,14 +9,35 @@ const client = axios.create({
   }
 });
 
+// Add request interceptor to inject token only for specific APIs
+client.interceptors.request.use((config) => {
+  // Only add token to these APIs
+  const tokenRequiredAPIs = [
+    '/tea_machine/search_options',
+    '/tea_machine/search_products',
+  ];
+  
+  const isTokenRequired = tokenRequiredAPIs.some(api => config.url && config.url.includes(api));
+  
+  if (isTokenRequired) {
+    const token = localStorage.getItem('posToken');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+  }
+  return config;
+}, (error) => {
+  return Promise.reject(error);
+});
+
 // Auth service for POS login and options
 export const posAuthAPI = {
   login: (email, password) => client.post('/tea_machine/login', { email, password }),
-  getOptions: (businessId, token, pageSize, pageIdx) => client.get('/tea_machine/search_options', { 
-    params: { token, business_id: businessId, page_size: pageSize, page_idx: pageIdx }
+  getOptions: (businessId, pageSize, pageIdx) => client.get('/tea_machine/search_options', { 
+    params: { business_id: businessId, page_size: pageSize, page_idx: pageIdx }
   }),
-  searchProducts: (businessId, token, pageSize, pageIdx) => client.get('/tea_machine/search_products', { 
-    params: { token, business_id: businessId, page_size: pageSize, page_idx: pageIdx }
+  searchProducts: (businessId, pageSize, pageIdx) => client.get('/tea_machine/search_products', { 
+    params: { business_id: businessId, page_size: pageSize, page_idx: pageIdx }
   })
 };
 
