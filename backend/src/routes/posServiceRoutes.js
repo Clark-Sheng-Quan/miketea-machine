@@ -19,7 +19,7 @@ const POS_API_BASE = process.env.POS_API_BASE;
  * Get all options (flavors) from POS system with pagination
  * Query: { token, business_id, page_size, page_idx }
  */
-router.get('/search_options', verifyTokenMiddleware(), async (req, res) => {
+router.get('/search_options', async (req, res) => {
   try {
     // Get token from Authorization header
     const authHeader = req.headers.authorization;
@@ -29,13 +29,6 @@ router.get('/search_options', verifyTokenMiddleware(), async (req, res) => {
     const { business_id, page_size = '50', page_idx = '0' } = req.query;
     const pageSize = parseInt(page_size);
     const pageIdx = parseInt(page_idx);
-
-    if (!token) {
-      return res.status(401).json({
-        success: false,
-        message: 'Token is required in Authorization header'
-      });
-    }
 
     if (!business_id) {
       return res.status(400).json({
@@ -107,7 +100,7 @@ router.get('/search_options', verifyTokenMiddleware(), async (req, res) => {
  * Search products from POS system
  * Query: { token, business_id, page_size, page_idx }
  */
-router.get('/search_products', verifyTokenMiddleware(), async (req, res) => {
+router.get('/search_products', async (req, res) => {
   try {
     // Get token from Authorization header
     const authHeader = req.headers.authorization;
@@ -117,13 +110,6 @@ router.get('/search_products', verifyTokenMiddleware(), async (req, res) => {
     const { business_id, page_size = '20', page_idx = '0' } = req.query;
     const pageSize = parseInt(page_size);
     const pageIdx = parseInt(page_idx);
-
-    if (!token) {
-      return res.status(401).json({
-        success: false,
-        message: 'Token is required in Authorization header'
-      });
-    }
 
     if (!business_id) {
       return res.status(400).json({
@@ -188,7 +174,7 @@ router.get('/search_products', verifyTokenMiddleware(), async (req, res) => {
  * Save option item codes to database
  * Body: { business_id, item_codes: [{ optionId, optionItemId, code }, ...] }
  */
-router.post('/save_optionCode', verifyTokenMiddleware(), async (req, res) => {
+router.post('/save_optionCode', async (req, res) => {
   try {
     const { business_id, item_codes } = req.body;
 
@@ -234,7 +220,7 @@ router.post('/save_optionCode', verifyTokenMiddleware(), async (req, res) => {
  * Get all item codes for a business
  * Query: { business_id }
  */
-router.get('/get_optionCode', verifyTokenMiddleware(), async (req, res) => {
+router.get('/get_optionCode', async (req, res) => {
   try {
     const { business_id } = req.query;
 
@@ -269,7 +255,7 @@ router.get('/get_optionCode', verifyTokenMiddleware(), async (req, res) => {
  * Get item codes for a specific option
  * Query: { business_id, option_id }
  */
-router.get('/search_optionCode', verifyTokenMiddleware(), async (req, res) => {
+router.get('/search_optionCode', async (req, res) => {
   try {
     const { business_id, option_id } = req.query;
 
@@ -304,7 +290,7 @@ router.get('/search_optionCode', verifyTokenMiddleware(), async (req, res) => {
  * Get current QR protocol formula for business
  * Query: { business_id }
  */
-router.get('/get_formula', verifyTokenMiddleware(), async (req, res) => {
+router.get('/get_formula', async (req, res) => {
   try {
     const { business_id } = req.query;
 
@@ -374,7 +360,7 @@ router.get('/get_formula', verifyTokenMiddleware(), async (req, res) => {
  * Save QR protocol formula for business
  * Body: { business_id, formula }
  */
-router.post('/save_formula', verifyTokenMiddleware(), async (req, res) => {
+router.post('/save_formula', async (req, res) => {
   try {
     const { business_id, formula } = req.body;
 
@@ -455,7 +441,7 @@ router.post('/save_formula', verifyTokenMiddleware(), async (req, res) => {
  * Query: { business_id }
  * Returns: { success, data: [...] }
  */
-router.get('/get_productCode', verifyTokenMiddleware(), async (req, res) => {
+router.get('/get_productCode', async (req, res) => {
   try {
     const { business_id } = req.query;
 
@@ -491,7 +477,7 @@ router.get('/get_productCode', verifyTokenMiddleware(), async (req, res) => {
  * Body: { business_id, product_id, code }
  * Returns: { success, data: {...} }
  */
-router.post('/save_productCode', verifyTokenMiddleware(), async (req, res) => {
+router.post('/save_productCode', async (req, res) => {
   try {
     const { business_id, product_id, code } = req.body;
 
@@ -527,7 +513,7 @@ router.post('/save_productCode', verifyTokenMiddleware(), async (req, res) => {
  * Query: { business_id, product_id }
  * Returns: { success, data: [{product_id, code}] }
  */
-router.get('/search_productCode', verifyTokenMiddleware(), async (req, res) => {
+router.get('/search_productCode', async (req, res) => {
   try {
     const { business_id, product_id } = req.query;
 
@@ -563,7 +549,7 @@ router.get('/search_productCode', verifyTokenMiddleware(), async (req, res) => {
  * Query: { business_id }
  * Returns: { success, data: { business_id, enabled } }
  */
-router.get('/getSwitch', verifyTokenMiddleware(), async (req, res) => {
+router.get('/getSwitch', async (req, res) => {
   try {
     const { business_id } = req.query;
 
@@ -674,7 +660,7 @@ router.get('/sync-qr-data', verifyTokenMiddleware(), async (req, res) => {
  * Body: { business_id, enabled }
  * Returns: { success, data: { business_id, enabled } }
  */
-router.post('/saveSwitch', verifyTokenMiddleware(), async (req, res) => {
+router.post('/saveSwitch', async (req, res) => {
   try {
     const { business_id, enabled } = req.body;
 

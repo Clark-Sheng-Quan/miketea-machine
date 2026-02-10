@@ -9,11 +9,21 @@ const client = axios.create({
   }
 });
 
-// Add request interceptor to inject token
+// Add request interceptor to inject token only for specific APIs
 client.interceptors.request.use((config) => {
-  const token = localStorage.getItem('posToken');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+  // Only add token to these APIs
+  const tokenRequiredAPIs = [
+    '/tea_machine/search_options',
+    '/tea_machine/search_products',
+  ];
+  
+  const isTokenRequired = tokenRequiredAPIs.some(api => config.url && config.url.includes(api));
+  
+  if (isTokenRequired) {
+    const token = localStorage.getItem('posToken');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
   }
   return config;
 }, (error) => {
