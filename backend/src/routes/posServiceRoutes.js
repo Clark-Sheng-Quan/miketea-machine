@@ -30,6 +30,13 @@ router.get('/search_options', async (req, res) => {
     const pageSize = parseInt(page_size);
     const pageIdx = parseInt(page_idx);
 
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        message: 'Token is required in Authorization header'
+      });
+    }
+
     if (!business_id) {
       return res.status(400).json({
         success: false,
@@ -110,6 +117,13 @@ router.get('/search_products', async (req, res) => {
     const { business_id, page_size = '20', page_idx = '0' } = req.query;
     const pageSize = parseInt(page_size);
     const pageIdx = parseInt(page_idx);
+
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        message: 'Token is required in Authorization header'
+      });
+    }
 
     if (!business_id) {
       return res.status(400).json({
@@ -378,8 +392,10 @@ router.post('/save_formula', async (req, res) => {
       });
     }
 
+    // 规范化参数名为驼峰格式
     const normalizedFormula = normalizeFormulaParameters(formula);
-
+    
+    // 验证参数是否有效
     const validation = validateFormulaParameters(normalizedFormula);
     if (!validation.isValid) {
       return res.status(400).json({

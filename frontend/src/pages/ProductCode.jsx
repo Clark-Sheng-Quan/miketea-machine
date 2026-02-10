@@ -7,7 +7,7 @@ export default function ProductCodeManagement() {
   const businessId = localStorage.getItem('POS_BUSINESS_ID') || localStorage.getItem('selectedBusinessId')
   const [token, setToken] = useState('')
   const [products, setProducts] = useState([])
-  // const [productCodes, setProductCodes] = useState({})
+  const [productCodes, setProductCodes] = useState({})
   const [loading, setLoading] = useState(true)
   const [loadingProducts, setLoadingProducts] = useState(false)
   const [savingCode, setSavingCode] = useState(false)
@@ -97,7 +97,7 @@ export default function ProductCodeManagement() {
       setLoadingProducts(true)
 
       // Search products from POS API with pagination
-      const response = await posAuthAPI.searchProducts(businessId, token, pageSize, pageIdx)
+      const response = await posAuthAPI.searchProducts(businessId, pageSize, pageIdx)
 
       if (response.data.success && response.data.data) {
         const productList = response.data.data?.products || []
@@ -159,6 +159,7 @@ export default function ProductCodeManagement() {
           ...prev,
           [currentProduct.product_id]: currentCode
         }))
+        message.success('Product code saved successfully!')
       }
     } catch (error) {
       console.error('Error saving product code:', error)

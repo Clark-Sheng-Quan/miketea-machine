@@ -27,7 +27,7 @@ export default function OptionsManagement() {
   const loadOptions = async (pageIdx = 0) => {
     try {
       setLoading(true)
-      const response = await posAuthAPI.getOptions(businessId, token, pageSize, pageIdx)
+      const response = await posAuthAPI.getOptions(businessId, pageSize, pageIdx)
       console.log('[OptionsManagement] Response:', response.data)
       const optionsData = response.data.data?.option || []
       const maxPageNum = response.data.data?.max_page || 0
@@ -104,6 +104,9 @@ export default function OptionsManagement() {
 
       const response = await itemCodesAPI.save(businessId, validCodes);
       
+      if (response.data.success) {
+        message.success('Option codes saved successfully!')
+      }
     } catch (error) {
       message.error(error.response?.data?.message || 'Failed to save item codes');
       console.error(error);
