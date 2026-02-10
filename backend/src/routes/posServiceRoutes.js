@@ -5,8 +5,8 @@ import { OptionItemCode } from '../models/OptionItemCode.js';
 import { Template } from '../models/Template.js';
 import { ProductCode } from '../models/ProductCode.js';
 import { ProductCodeSwitch } from '../models/ProductCodeSwitch.js';
-import { normalizeFormulaParameters, validateFormulaParameters } from '../utils/naming.js';
 import { verifyTokenMiddleware } from '../services/tokenService.js';
+import { normalizeFormulaParameters, validateFormulaParameters } from '../utils/naming.js';
 
 dotenv.config();
 
@@ -21,8 +21,12 @@ const POS_API_BASE = process.env.POS_API_BASE;
  */
 router.get('/search_options', async (req, res) => {
   try {
-    // Get token from query params (frontend passes in URL)
-    const { token, business_id, page_size = '50', page_idx = '0' } = req.query;
+    // Get token from Authorization header
+    const authHeader = req.headers.authorization;
+    const token = authHeader ? authHeader.replace('Bearer ', '') : null;
+    
+    // Get other params from query
+    const { business_id, page_size = '50', page_idx = '0' } = req.query;
     const pageSize = parseInt(page_size);
     const pageIdx = parseInt(page_idx);
 
@@ -35,18 +39,12 @@ router.get('/search_options', async (req, res) => {
 
     console.log('[PosService] Fetching options for business:', business_id, 'page_idx:', pageIdx, 'page_size:', pageSize);
 
-    const headers = {
-      'Content-Type': 'application/json'
-    };
-    
-    // Add token to POS API request if provided
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-
     const client = axios.create({
       baseURL: POS_API_BASE,
-      headers: headers,
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
       timeout: 10000
     });
 
@@ -89,29 +87,13 @@ router.get('/search_options', async (req, res) => {
   } catch (error) {
     console.error('[PosService] Fetch options error:', error.message);
 
-    // Check if it's a business_id not found error
-    if (error.response?.status === 404 || error.response?.data?.message?.includes('not found')) {
-      return res.status(400).json({
-        success: false,
-        message: `Business ID not found in POS system: ${error.response?.data?.message || 'Invalid business ID'}`
-      });
-    }
-
-    // Check if it's an authentication error
-    if (error.response?.status === 401) {
-      return res.status(401).json({
-        success: false,
-        message: 'POS API authentication failed - Invalid token'
-      });
-    }
-
     res.status(error.response?.status || 500).json({
       success: false,
-      message: error.response?.data?.message || 'Failed to fetch options from POS system',
+      message: error.response?.data?.message || 'Failed to fetch options',
       error: error.message
     });
   }
-});;
+});
 
 /**
  * GET /api/service/pos/search-products
@@ -120,8 +102,12 @@ router.get('/search_options', async (req, res) => {
  */
 router.get('/search_products', async (req, res) => {
   try {
-    // Get token from query params (frontend passes in URL)
-    const { token, business_id, page_size = '20', page_idx = '0' } = req.query;
+    // Get token from Authorization header
+    const authHeader = req.headers.authorization;
+    const token = authHeader ? authHeader.replace('Bearer ', '') : null;
+    
+    // Get other params from query
+    const { business_id, page_size = '20', page_idx = '0' } = req.query;
     const pageSize = parseInt(page_size);
     const pageIdx = parseInt(page_idx);
 
@@ -134,18 +120,12 @@ router.get('/search_products', async (req, res) => {
 
     console.log('[PosService] Searching products for business:', business_id, 'page_idx:', pageIdx, 'page_size:', pageSize);
 
-    const headers = {
-      'Content-Type': 'application/json'
-    };
-    
-    // Add token to POS API request if provided
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-
     const client = axios.create({
       baseURL: POS_API_BASE,
-      headers: headers,
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
       timeout: 10000
     });
 
@@ -158,18 +138,6 @@ router.get('/search_products', async (req, res) => {
       page_idx: pageIdx,
       detail: true
     });
-
-    // Check if response has data
-    if (!response.data || !response.data.data || !response.data.data.products) {
-      return res.json({
-        success: true,
-        data: {
-          products: [],
-          max_page: 0,
-          total: 0
-        }
-      });
-    }
 
     console.log('[PosService] Products searched successfully');
 
@@ -192,25 +160,9 @@ router.get('/search_products', async (req, res) => {
   } catch (error) {
     console.error('[PosService] Search products error:', error.message);
 
-    // Check if it's a business_id not found error
-    if (error.response?.status === 404 || error.response?.data?.message?.includes('not found')) {
-      return res.status(400).json({
-        success: false,
-        message: `Business ID not found in POS system: ${error.response?.data?.message || 'Invalid business ID'}`
-      });
-    }
-
-    // Check if it's an authentication error
-    if (error.response?.status === 401) {
-      return res.status(401).json({
-        success: false,
-        message: 'POS API authentication failed - Invalid token'
-      });
-    }
-
     res.status(error.response?.status || 500).json({
       success: false,
-      message: error.response?.data?.message || 'Failed to search products from POS system',
+      message: error.response?.data?.message || 'Failed to search products',
       error: error.message
     });
   }
@@ -426,10 +378,8 @@ router.post('/save_formula', async (req, res) => {
       });
     }
 
-    // 规范化参数名为驼峰格式
     const normalizedFormula = normalizeFormulaParameters(formula);
-    
-    // 验证参数是否有效
+
     const validation = validateFormulaParameters(normalizedFormula);
     if (!validation.isValid) {
       return res.status(400).json({
