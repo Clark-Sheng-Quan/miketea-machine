@@ -74,8 +74,6 @@ function setupCORS() {
         'http://vend88-tea-machine.s3-website-us-east-1.amazonaws.com',
         'http://vend-88.s3-website-us-east-1.amazonaws.com',  // S3 frontend
         'https://vend-88.s3-website-us-east-1.amazonaws.com',  // S3 frontend HTTPS
-        // 'http://localhost:3001',
-        // 'http://192.168.0.99:3001/'
       ];
 
       // In development, allow all origins
