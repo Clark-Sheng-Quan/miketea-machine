@@ -67,11 +67,11 @@ function setupCORS() {
   const corsOptions = {
     origin: function(origin, callback) {
       const allowedOrigins = [
-        'https://www.vend88.com.au',
+        'http://www.vend88.com.au',
         'https://www.vend88.com.au/',
         'https://dev.vend88.com',
-        'https://dev.vend88.com/',
-        'http://vend88-tea-machine.s3-website-us-east-1.amazonaws.com',
+        'http://dev.vend88.com/',
+        'https://54.90.180.79',     // Production server
         'http://vend-88.s3-website-us-east-1.amazonaws.com',  // S3 frontend
         'https://vend-88.s3-website-us-east-1.amazonaws.com',  // S3 frontend HTTPS
       ];

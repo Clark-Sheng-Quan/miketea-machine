@@ -7,7 +7,7 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/tea_machine': {
-        target: 'http://localhost:3000',
+        target: 'http://54.90.180.79',
         changeOrigin: true
       }
     }
