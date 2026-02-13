@@ -5,7 +5,8 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: miketea-backend-prod
-    env_file: .env
+    env_file:
+      - ./.env
     ports:
       - "3000:3000"
     volumes:
