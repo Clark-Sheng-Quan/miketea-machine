@@ -1,14 +1,4 @@
 services:
-  mongodb:
-    image: mongo:7
-    container_name: miketea-mongodb
-    mem_limit: 512m
-    volumes:
-      - miketea-mongodb-data:/data/db
-    networks:
-      - miketea-network
-    restart: unless-stopped
-
   backend:
     build:
       context: .
@@ -16,16 +6,12 @@ services:
     container_name: miketea-backend
     env_file:
       - ./.env
-    environment:
-      MONGODB_URI: mongodb://mongodb:27017
     mem_limit: 384m
     ports:
       - "3000:3000"
     networks:
       - miketea-network
     restart: unless-stopped
-    depends_on:
-      - mongodb
     healthcheck:
       test: ["CMD", "wget", "--spider", "--quiet", "http://localhost:3000/health"]
       interval: 30s
@@ -35,6 +21,3 @@ services:
 networks:
   miketea-network:
     driver: bridge
-
-volumes:
-  miketea-mongodb-data:
