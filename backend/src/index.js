@@ -4,11 +4,11 @@ import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { initializeDatabase } from './config/database.js';
-import { OptionItemCode } from './models/OptionItemCode.js';
-import { Template } from './models/Template.js';
-import { ProductCode } from './models/ProductCode.js';
-import { ProductCodeSwitch } from './models/ProductCodeSwitch.js';
+import { initializeDatabase } from './config/mongodb.js';
+import { OptionItemCode } from './models/MongoOptionItemCode.js';
+import { Template } from './models/MongoTemplate.js';
+import { ProductCode } from './models/MongoProductCode.js';
+import { ProductCodeSwitch } from './models/MongoProductCodeSwitch.js';
 import posServiceRoutes from './routes/posServiceRoutes.js';
 
 dotenv.config();
@@ -67,6 +67,7 @@ function setupCORS() {
   const corsOptions = {
     origin: function(origin, callback) {
       const allowedOrigins = [
+        CORS_ORIGIN,
         'http://www.vend88.com.au',
         'https://www.vend88.com.au/',
         'https://dev.vend88.com',
@@ -82,7 +83,7 @@ function setupCORS() {
       }
 
       // In production, check whitelist
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (!origin || allowedOrigins.includes(origin) || allowedOrigins.includes(origin.replace(/\/$/, ''))) {
         callback(null, true);
       } else {
         console.warn(`CORS blocked request from origin: ${origin}`);

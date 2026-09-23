@@ -1,15 +1,15 @@
-# Dockerfile for Frontend - Development Mode
-
-FROM node:18-alpine
+FROM node:18-alpine AS build
 
 WORKDIR /app
 
 COPY package*.json ./
-
-RUN rm -rf node_modules && npm install
-
+RUN npm ci
 COPY . .
+RUN npm run build
 
-EXPOSE 3001
+FROM nginx:alpine
 
-CMD ["npm", "run", "dev", "--", "--host"]
+COPY frontend/nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=build /app/dist /usr/share/nginx/html
+
+EXPOSE 80

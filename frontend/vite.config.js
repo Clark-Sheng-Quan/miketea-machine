@@ -13,7 +13,7 @@ export default defineConfig({
     },
     proxy: {
       '/tea_machine': {
-        target: 'http://54.90.180.79:3000',
+        target: process.env.VITE_API_TARGET || 'http://localhost:3000',
         changeOrigin: true
       }
     },

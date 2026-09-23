@@ -1,43 +1,48 @@
 services:
-  # Node.js Backend
+  mongodb:
+    image: mongo:7
+    container_name: miketea-mongodb
+    volumes:
+      - miketea-mongodb-data:/data/db
+    networks:
+      - miketea-network
+    restart: always
+
   backend:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: miketea-backend-prod
+    container_name: miketea-backend
     env_file:
       - ./.env
-    ports:
-      - "3000:3000"
+    environment:
+      MONGODB_URI: mongodb://mongodb:27017
+    expose:
+      - "3000"
     volumes:
-      - ./src:/app/src
       - /var/log/miketea-machine:/var/log/miketea-machine
     networks:
       - miketea-network
     restart: always
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+    depends_on:
+      - mongodb
 
-  # Nginx Reverse Proxy
-  nginx:
-    image: nginx:alpine
-    container_name: miketea-nginx-prod
+  frontend:
+    build:
+      context: ..
+      dockerfile: frontend/Dockerfile
+    container_name: miketea-frontend
     ports:
       - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./certs:/etc/nginx/certs:ro
-      - /var/log/nginx:/var/log/nginx
-    depends_on:
-      - backend
     networks:
       - miketea-network
     restart: always
+    depends_on:
+      - backend
 
 networks:
   miketea-network:
     driver: bridge
+
+volumes:
+  miketea-mongodb-data:

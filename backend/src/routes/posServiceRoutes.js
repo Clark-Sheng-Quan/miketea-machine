@@ -1,10 +1,10 @@
 import express from 'express';
 import axios from 'axios';
 import dotenv from 'dotenv';
-import { OptionItemCode } from '../models/OptionItemCode.js';
-import { Template } from '../models/Template.js';
-import { ProductCode } from '../models/ProductCode.js';
-import { ProductCodeSwitch } from '../models/ProductCodeSwitch.js';
+import { OptionItemCode } from '../models/MongoOptionItemCode.js';
+import { Template } from '../models/MongoTemplate.js';
+import { ProductCode } from '../models/MongoProductCode.js';
+import { ProductCodeSwitch } from '../models/MongoProductCodeSwitch.js';
 import { verifyTokenMiddleware } from '../services/tokenService.js';
 import { normalizeFormulaParameters, validateFormulaParameters } from '../utils/naming.js';
 
