@@ -22,7 +22,7 @@ LOG_DIR=/var/log/miketea-machine
 ```
 
 ```bash
-# 3. Start MongoDB, backend, and frontend/Nginx
+# 3. Start MongoDB and backend
 docker compose up -d --build
 ```
 
@@ -37,13 +37,13 @@ docker compose logs -f backend
 ```
 
 ```bash
-# 6. Test the API
-curl http://127.0.0.1/tea_machine/health
+# 6. Test the backend
+curl http://127.0.0.1:3000/health
 ```
 
 ```bash
 # 7. Test the QR API
-curl "http://SERVER_IP/tea_machine/sync-qr-data?business_id=BUSINESS_ID" \
+curl "http://SERVER_IP:3000/tea_machine/sync-qr-data?business_id=BUSINESS_ID" \
   -H "Authorization: Bearer VALID_POS_TOKEN"
 ```
 

@@ -2,11 +2,12 @@ services:
   mongodb:
     image: mongo:7
     container_name: miketea-mongodb
+    mem_limit: 512m
     volumes:
       - miketea-mongodb-data:/data/db
     networks:
       - miketea-network
-    restart: always
+    restart: unless-stopped
 
   backend:
     build:
@@ -17,28 +18,19 @@ services:
       - ./.env
     environment:
       MONGODB_URI: mongodb://mongodb:27017
-    expose:
-      - "3000"
-    volumes:
-      - /var/log/miketea-machine:/var/log/miketea-machine
+    mem_limit: 384m
+    ports:
+      - "3000:3000"
     networks:
       - miketea-network
-    restart: always
+    restart: unless-stopped
     depends_on:
       - mongodb
-
-  frontend:
-    build:
-      context: ..
-      dockerfile: frontend/Dockerfile
-    container_name: miketea-frontend
-    ports:
-      - "80:80"
-    networks:
-      - miketea-network
-    restart: always
-    depends_on:
-      - backend
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "--quiet", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
 networks:
   miketea-network:
